@@ -5,7 +5,8 @@
     "modernizr": "~2.6.2",
     "jquery": "~1.11.0",
     "underscore": "~1.6.0",
-    "yepnope": "~1.5.0"
+    "yepnope": "~1.5.0",
+    "jquery.ui": "~1.5.0"
   },
   "devDependencies": {}
 }
