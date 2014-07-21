@@ -1,3 +1,5 @@
+'use strict';
+
 var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 	replaceChar = function (str, charA, charB) {
 		var temp = [];
