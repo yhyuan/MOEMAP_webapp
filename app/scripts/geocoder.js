@@ -1,6 +1,13 @@
 'use strict';
 
 var regIsFloat = /^(-?\d+)(\.\d+)?$/,
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 	replaceChar = function (str, charA, charB) {
 		var temp = [];
 		temp = str.split(charA);
@@ -11,7 +18,14 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			}
 		}
 		return result;
-	}, 
+	},
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */ 
 	//http://appdelegateinc.com/blog/2010/05/16/point-in-polygon-checking/
 	// Ray Cast Point in Polygon extension for Google Maps GPolygon
 	// App Delegate Inc <htttp://appdelegateinc.com> 2010
@@ -35,17 +49,26 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			j = i;
 		}
 		return inPoly;
-		/*
-		return {
-			success: inPoly,
-			latlng: latlng
-		};*/
 	},
+	/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 	validateUTMInRange = function (utmCoors, UTMRange) {
 		var northing = utmCoors.northing;
 		var easting = utmCoors.easting;
 		return ((easting < UTMRange.maxEasting) && (easting > UTMRange.minEasting) && (northing < UTMRange.maxNorthing) && (northing > UTMRange.minNorthing));
 	},
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 	convertUTMtoLatLng = function (utmCoors) {
 		var zone = utmCoors.zone;
 		var north = utmCoors.northing;
@@ -103,6 +126,13 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 		};
 		return res;
 	},
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 	parseLatLngSymbols = function (val, s1, s2, s3) {
 		var parseDMS = function (s, unparsed) {
 			var res = {
@@ -146,6 +176,13 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 		result = Math.abs(result);
 		return result;
 	},
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 //Private method: parse the input to get Lot, Concession
 	processLotCon = function (arr1) {
 		if (arr1.length !== 2) {
@@ -184,7 +221,13 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			success: true
 		};
 	},
-
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 //Private method: parse the input to get Township, Lot, Concession by calling processLotCon
 	preprocessTWP = function (coors_Up) {
 		var res = {
@@ -224,10 +267,24 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 		}
 		return res;
 	},
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 	getTWPinfo = function (originalAddress) {
 		return preprocessTWP(replaceChar(originalAddress, ',', ' ').trim().split(/\s+/).join(' ').toUpperCase()); 
 	},
-	geocodeWithagsQuery = function (params, settings, callback) {
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
+	geocodeByQuery = function (params, settings, callback) {
 		var layer = new gmaps.ags.Layer(settings.mapService + "/" + settings.layerID);
 		var outFields = settings.fieldsInInfoWindow;
 		outFields.push(settings.latitudeField);
@@ -434,7 +491,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					areaField: "SHAPE_Area",
 					searchCondition: "OFFICIAL_NAME_UPPER = '" + twpInfo.TWP + "'"
 				};
-				geocodeWithagsQuery(params, settings, callback);
+				geocodeByQuery(params, settings, callback);
 			}
 		},
 		"GeographicTownshipWithLotConcession" : {
@@ -457,8 +514,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					areaField: "SHAPE_Area",
 					searchCondition: "GEOG_TWP" + " = '" + twpInfo.TWP + "' AND CONCESSION = 'CON " + twpInfo.Con + "' AND LOT_NUM = 'LOT " + twpInfo.Lot + "'"
 				};
-
-				geocodeWithagsQuery(params, settings, callback);
+				geocodeByQuery(params, settings, callback);
 			}
 		}
 	};
@@ -497,37 +553,26 @@ function geocode(initParams, callback) {
 			return {lat: lat, lng: lng};
 		}
 	};
-
 	var params = _.defaults(initParams, defaultParams);
-	var geocoder = _.find(_.values(params.geocoderList), function(geocoder){ 
-		return geocoder.match(params);
-	});
-	if(!!geocoder) {
-		geocoder.geocode(params, callback)
-	} else {
-		callback({}, "Error");
+	if (!!initParams.geocoderList) {
+		params.geocoderList = params.geocoderList.concat(initParams.geocoderList);
 	}
-}
-
-/**
- * Reverse geocode a location with latitude & longitude. 
- * If it cantains lat and lng as its properties, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
- * called to convert it to geocoding params. 
- *
- * @param {string} d The address to be geocoded.
- * @return {object} An ojbect sendt to geocoder.
- */
-var reverseGeocode = function (params) {
-	if ((!!params) && params.hasOwnProperty('lat') && params.hasOwnProperty('lng')) {
-		reverseGeocode(params);
+	if (!!params.latlng & !!params.latlng.lat & !!params.latlng.lng & !!params.reverseGeocoder) {
+		params.reverseGeocoder(params, callback);
 	} else {
-		params.errback(params);
+		var geocoder = _.find(_.values(params.geocoderList), function(geocoder){ 
+			return geocoder.match(params);
+		});
+		if(!!geocoder) {
+			geocoder.geocode(params, callback)
+		} else {
+			callback({}, "Error");
+		}
 	}
 }
 
 var api = {
-	geocode: geocode,
-	reverseGeocode: reverseGeocode
+	geocode: geocode
 }
 
 module.exports = api;
