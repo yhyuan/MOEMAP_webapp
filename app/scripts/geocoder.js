@@ -226,7 +226,6 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 	}, 
 	geocoderList = {
 		"LatLngInDecimalDegree" : {
-			synchronous: true,
 			"match": function (params) {
 				var coorsArray = replaceChar(params.originalAddress, ',', ' ').trim().split(/\s+/);
 				if ((coorsArray.length === 2) && regIsFloat.test(coorsArray[0]) && regIsFloat.test(coorsArray[1])) {
@@ -237,13 +236,14 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params) {
-				params.latlng = this.latlng;
-				return params;
+			"geocode": function (params, callback) {
+				callback({
+					latlng: this.latlng,
+					address: params.originalAddress
+				}, "OK");
 			}
 		},
 		"LatLngInSymbols" : {
-			synchronous: true,
 			"match": function (params) {
 				var degreeSym = String.fromCharCode(176);
 				var coorsArray = replaceChar(params.originalAddress, ',', ' ').trim().split(/\s+/);
@@ -255,13 +255,14 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params) {
-				params.latlng = this.latlng;
-				return params;
+			"geocode": function (params, callback) {
+				callback({
+					latlng: this.latlng,
+					address: params.originalAddress
+				}, "OK");
 			}
 		},
 		"LatLngInDMSSymbols" : {
-			synchronous: true,
 			"match": function (params) {
 				var coorsArray = replaceChar(params.originalAddress, ',', ' ').trim().split(/\s+/);
 				if (coorsArray.length === 2) {
@@ -284,13 +285,14 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params) {
-				params.latlng = this.latlng;
-				return params;
+			"geocode": function (params, callback) {
+				callback({
+					latlng: this.latlng,
+					address: params.originalAddress
+				}, "OK");
 			}
 		},
 		"UTMInDefaultZone" : {
-			synchronous: true,
 			"match": function (params) {
 				var coorsArray = replaceChar(params.originalAddress, ',', ' ').trim().split(/\s+/);
 				if ((coorsArray.length === 2) && regIsFloat.test(coorsArray[0]) && regIsFloat.test(coorsArray[1])) {
@@ -308,13 +310,14 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params) {
-				params.latlng = this.latlng;
-				return params;
+			"geocode": function (params, callback) {
+				callback({
+					latlng: this.latlng,
+					address: params.originalAddress
+				}, "OK");
 			}
 		},
 		"UTM" : {
-			synchronous: true,
 			"match": function (params) {
 				var coorsArray = replaceChar(params.originalAddress, ',', ' ').trim().split(/\s+/);
 				if (coorsArray.length === 3) {
@@ -345,13 +348,14 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params) {
-				params.latlng = this.latlng;
-				return params;
+			"geocode": function (params, callback) {
+				callback({
+					latlng: this.latlng,
+					address: params.originalAddress
+				}, "OK");
 			}
 		},
 		"GeographicTownship" : {
-			synchronous: false,
 			mapService: "http://www.appliomaps.lrc.gov.on.ca/ArcGIS/rest/services/MOE/sportfishservice/MapServer",
 			layerID: 0,
 			displayPolygon: true,  
@@ -382,7 +386,6 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			}
 		},
 		"GeographicTownshipWithLotConcession" : {
-			synchronous: false,
 			mapService: "http://www.appliomaps.lrc.gov.on.ca/ArcGIS/rest/services/MOE/sportfishservice/MapServer",
 			layerID: 1,
 			displayPolygon: true,  
@@ -493,11 +496,7 @@ function geocode(initParams, callback) {
 		return geocoder.match(params);
 	});
 	if(!!geocoder) {
-		if (geocoder.synchronous) {
-			callback(geocoder.geocode(params));
-		} else {
-			geocoder.geocode(params, callback)
-		}
+		geocoder.geocode(params, callback)
 	} else {
 		results = [];
 		status = "Error";
