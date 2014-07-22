@@ -366,16 +366,16 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			"geocode": function (params, callback) {
 				var twpInfo = getTWPinfo(params.originalAddress);
 				var settings = {
-					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
+					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships1/MapServer",
 					layerID: 0,
-					displayPolygon: false,  
+					displayPolygon: true,  
 					fieldsInInfoWindow: ["OFFICIAL_NAME"], 
 					getInfoWindow: function(attributes){
 						return "<strong>" + attributes.OFFICIAL_NAME + "</strong>";
 					}, 
 					latitudeField: "CENY",
 					longitudeField: "CENX",
-					areaField: "SHAPE_Area",
+					areaField: "AREA",
 					searchCondition: "OFFICIAL_NAME_UPPER = '" + twpInfo.TWP + "'"
 				};
 				geocodeWithagsQuery(params, settings, callback);
@@ -389,7 +389,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			"geocode": function (params, callback) {
 				var twpInfo = getTWPinfo(params.originalAddress);
 				var settings = { 
-					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
+					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships1/MapServer",
 					layerID: 1,
 					displayPolygon: true,  
 					fieldsInInfoWindow: ["GEOG_TWP", "LOT_NUM", "CONCESSION"], 
@@ -398,7 +398,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					}, 
 					latitudeField: "CENY",
 					longitudeField: "CENX",
-					areaField: "SHAPE_Area",
+					areaField: "AREA",
 					searchCondition: "GEOG_TWP" + " = '" + twpInfo.TWP + "' AND CONCESSION = 'CON " + twpInfo.Con + "' AND LOT_NUM = 'LOT " + twpInfo.Lot + "'"
 				};
 
@@ -420,57 +420,41 @@ var geocodeWithagsQuery = function (params, settings, callback) {
 	layer.query(queryParams, function (fset) {
 		var size = 0;
 		if(fset){
-			size = fset.features.length;			
+			var features = fset.features;
+			size = features.length;
+			
 			if (size > 0) {
+				var attrs = features[0].attributes;
+				var result = {
+					address: params.originalAddress,
+					geocodedAddress: settings.getInfoWindow(attrs)
+				};
+				if(queryParams.returnGeometry) {
+					result.geometry = _.map(features, function(feature) {
+						feature.geometry;
+					});
+				}
 				if (size === 1) {
-					var attrs = fset.features[0].attributes;					
-					var result = {
-						latlng: {
-							lat: attrs[settings.latitudeField],
-							lng: attrs[settings.longitudeField]
-						},
-						address: params.originalAddress,
-						geocodedAddress: settings.getInfoWindow(attrs)
-					}
-					callback(result, "OK");
+					result.latlng = {
+						lat: attrs[settings.latitudeField],
+						lng: attrs[settings.longitudeField]
+					};
 				} else {
-					var totalArea = _.reduce(fset.features, function(feature, total_area) {
+					var totalArea = _.reduce(features, function(total_area, feature) {
 						return feature.attributes[settings.areaField] + total_area;
 					}, 0);
-					var totalLat = _.reduce(fset.features, function(feature, total_lat) {
-						return feature.attributes[settings.latitudeField] + total_lat;
+					var totalLat = _.reduce(features, function(total_lat, feature) {
+						return feature.attributes[settings.latitudeField]* feature.attributes[settings.areaField] + total_lat;
 					}, 0);
-					var totalLng = _.reduce(fset.features, function(feature, total_lng) {
-						return feature.attributes[settings.longitudeField] + total_lng;
+					var totalLng = _.reduce(features, function(total_lng, feature) {
+						return feature.attributes[settings.longitudeField]* feature.attributes[settings.areaField] + total_lng;
 					}, 0);
-
-					var attrs = fset.features[0].attributes;					
-					var result = {
-						latlng: {
-							lat: totalLat/totalArea,
-							lng: totalLng/totalArea
-						},
-						address: params.originalAddress,
-						geocodedAddress: settings.getInfoWindow(attrs)
-					}
-					callback(result, "OK");
+					result.latlng = {
+						lat: totalLat/totalArea,
+						lng: totalLng/totalArea
+					};
 				}
-
-				//console.log(fset);
-				//if(queryParams.returnGeometry){
-					/*var centroid = returnCentroidAndPolyline(fset, latField, lngField);
-					queryParams.gLatLng = centroid.gLatLng;
-					queryParams.polylines = centroid.polylines;
-					queryParams.callback(queryParams);
-					*/
-				//	callback({}, "OK");
-				//}else{
-					/*var centroid2 = returnCentroid(fset, latField, lngField);
-					queryParams.gLatLng = centroid2.gLatLng;
-					queryParams.callback(queryParams);
-					*/
-					//callback({}, "OK");
-				//}
+				callback(result, "OK");
 			}else{
 				callback({}, "Error");
 			}

@@ -367,15 +367,16 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			"geocode": function (params, callback) {
 				var twpInfo = getTWPinfo(params.originalAddress);
 				var settings = {
-					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
+					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships1/MapServer",
 					layerID: 0,
-					displayPolygon: false,  
+					displayPolygon: true,  
 					fieldsInInfoWindow: ["OFFICIAL_NAME"], 
 					getInfoWindow: function(attributes){
 						return "<strong>" + attributes.OFFICIAL_NAME + "</strong>";
 					}, 
-					latitude: "CENY",
-					longitude: "CENX",
+					latitudeField: "CENY",
+					longitudeField: "CENX",
+					areaField: "AREA",
 					searchCondition: "OFFICIAL_NAME_UPPER = '" + twpInfo.TWP + "'"
 				};
 				geocodeWithagsQuery(params, settings, callback);
@@ -389,15 +390,16 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			"geocode": function (params, callback) {
 				var twpInfo = getTWPinfo(params.originalAddress);
 				var settings = { 
-					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
+					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships1/MapServer",
 					layerID: 1,
 					displayPolygon: true,  
 					fieldsInInfoWindow: ["GEOG_TWP", "LOT_NUM", "CONCESSION"], 
 					getInfoWindow: function(attributes){
 						return "<strong>" + attributes.GEOG_TWP + " " + attributes.LOT_NUM + " " + attributes.CONCESSION + "</strong>";
 					}, 
-					latitude: "CENY",
-					longitude: "CENX",
+					latitudeField: "CENY",
+					longitudeField: "CENX",
+					areaField: "AREA",
 					searchCondition: "GEOG_TWP" + " = '" + twpInfo.TWP + "' AND CONCESSION = 'CON " + twpInfo.Con + "' AND LOT_NUM = 'LOT " + twpInfo.Lot + "'"
 				};
 
@@ -408,8 +410,9 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 var geocodeWithagsQuery = function (params, settings, callback) {
 	var layer = new gmaps.ags.Layer(settings.mapService + "/" + settings.layerID);
 	var outFields = settings.fieldsInInfoWindow;
-	outFields.push(settings.latitude);
-	outFields.push(settings.longitude);
+	outFields.push(settings.latitudeField);
+	outFields.push(settings.longitudeField);
+	outFields.push(settings.areaField);
 	var queryParams = {
 		returnGeometry: settings.displayPolygon,
 		where: settings.searchCondition,
@@ -418,36 +421,41 @@ var geocodeWithagsQuery = function (params, settings, callback) {
 	layer.query(queryParams, function (fset) {
 		var size = 0;
 		if(fset){
-			size = fset.features.length;			
+			var features = fset.features;
+			size = features.length;
+			
 			if (size > 0) {
-				if (size === 1) {
-					var attrs = fset.features[0].attributes;					
-					var result = {
-						latlng: {
-							lat: attrs[settings.latitude],
-							lng: attrs[settings.longitude]
-						},
-						address: params.originalAddress,
-						geocodedAddress: settings.getInfoWindow(attrs)
-					}
-					callback(result, "OK");
+				var attrs = features[0].attributes;
+				var result = {
+					address: params.originalAddress,
+					geocodedAddress: settings.getInfoWindow(attrs)
+				};
+				if(queryParams.returnGeometry) {
+					result.geometry = _.map(features, function(feature) {
+						feature.geometry;
+					});
 				}
-
-				//console.log(fset);
-				//if(queryParams.returnGeometry){
-					/*var centroid = returnCentroidAndPolyline(fset, latField, lngField);
-					queryParams.gLatLng = centroid.gLatLng;
-					queryParams.polylines = centroid.polylines;
-					queryParams.callback(queryParams);
-					*/
-				//	callback({}, "OK");
-				//}else{
-					/*var centroid2 = returnCentroid(fset, latField, lngField);
-					queryParams.gLatLng = centroid2.gLatLng;
-					queryParams.callback(queryParams);
-					*/
-					//callback({}, "OK");
-				//}
+				if (size === 1) {
+					result.latlng = {
+						lat: attrs[settings.latitudeField],
+						lng: attrs[settings.longitudeField]
+					};
+				} else {
+					var totalArea = _.reduce(features, function(total_area, feature) {
+						return feature.attributes[settings.areaField] + total_area;
+					}, 0);
+					var totalLat = _.reduce(features, function(total_lat, feature) {
+						return feature.attributes[settings.latitudeField]* feature.attributes[settings.areaField] + total_lat;
+					}, 0);
+					var totalLng = _.reduce(features, function(total_lng, feature) {
+						return feature.attributes[settings.longitudeField]* feature.attributes[settings.areaField] + total_lng;
+					}, 0);
+					result.latlng = {
+						lat: totalLat/totalArea,
+						lng: totalLng/totalArea
+					};
+				}
+				callback(result, "OK");
 			}else{
 				callback({}, "Error");
 			}
@@ -645,10 +653,11 @@ var geocoder = require("../../app/scripts/geocoder");
             });            
         });
 	    describe('Geocoder can parse a string containing Geographic Township name in Ontario', function () {
+	    	this.timeout(15000);
+	    	
 	        it('should parse the Geographic Township in Ontario', function (done) {
 				geocoder.geocode({originalAddress: "Abinger TWP"}, function (result, status) {
 					expect(status).to.equal("OK");
-					console.log(result);
 					expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
 					expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
 					done();
@@ -670,8 +679,16 @@ var geocoder = require("../../app/scripts/geocoder");
 					done();
 				});
 	        });
+	        it('should parse the Geographic Township with multiple polygons in Ontario', function (done) {
+				geocoder.geocode({originalAddress: "Gibson Township"}, function (result, status) {
+					expect(status).to.equal("OK");
+					expect(Math.abs(result.latlng.lat - 44.9980573)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-79.8036325))).to.be.below(0.001);
+					done();
+				});
+	        });
 	        
-	        it('should not parse the wrong Geographic Township in Ontario', function () {
+	        it('should not parse the wrong Geographic Township in Ontario', function (done) {
 				geocoder.geocode({originalAddress: "Apple Township"}, function (result, status) {
 					expect(status).to.equal("Error");
 					done();
