@@ -227,6 +227,62 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 	getTWPinfo = function (originalAddress) {
 		return preprocessTWP(replaceChar(originalAddress, ',', ' ').trim().split(/\s+/).join(' ').toUpperCase()); 
 	},
+	geocodeWithagsQuery = function (params, settings, callback) {
+		var layer = new gmaps.ags.Layer(settings.mapService + "/" + settings.layerID);
+		var outFields = settings.fieldsInInfoWindow;
+		outFields.push(settings.latitudeField);
+		outFields.push(settings.longitudeField);
+		outFields.push(settings.areaField);
+		var queryParams = {
+			returnGeometry: settings.displayPolygon,
+			where: settings.searchCondition,
+			outFields: outFields
+		};
+		layer.query(queryParams, function (fset) {
+			var size = 0;
+			if(fset){
+				var features = fset.features;
+				size = features.length;				
+				if (size > 0) {
+					var attrs = features[0].attributes;
+					var result = {
+						address: params.originalAddress,
+						geocodedAddress: settings.getInfoWindow(attrs)
+					};
+					if(queryParams.returnGeometry) {
+						result.geometry = _.map(features, function(feature) {
+							return feature.geometry;
+						});
+					}
+					if (size === 1) {
+						result.latlng = {
+							lat: attrs[settings.latitudeField],
+							lng: attrs[settings.longitudeField]
+						};
+					} else {
+						var totalArea = _.reduce(features, function(total_area, feature) {
+							return feature.attributes[settings.areaField] + total_area;
+						}, 0);
+						var totalLat = _.reduce(features, function(total_lat, feature) {
+							return feature.attributes[settings.latitudeField]* feature.attributes[settings.areaField] + total_lat;
+						}, 0);
+						var totalLng = _.reduce(features, function(total_lng, feature) {
+							return feature.attributes[settings.longitudeField]* feature.attributes[settings.areaField] + total_lng;
+						}, 0);
+						result.latlng = {
+							lat: totalLat/totalArea,
+							lng: totalLng/totalArea
+						};
+					}
+					callback(result, "OK");
+				}else{
+					callback({}, "Error");
+				}
+			}else{
+				callback({}, "Error");
+			}
+		}); 
+	},
 	geocoderList = {
 		"LatLngInDecimalDegree" : {
 			"match": function (params) {
@@ -366,7 +422,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			"geocode": function (params, callback) {
 				var twpInfo = getTWPinfo(params.originalAddress);
 				var settings = {
-					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships1/MapServer",
+					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
 					layerID: 0,
 					displayPolygon: true,  
 					fieldsInInfoWindow: ["OFFICIAL_NAME"], 
@@ -375,7 +431,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					}, 
 					latitudeField: "CENY",
 					longitudeField: "CENX",
-					areaField: "AREA",
+					areaField: "SHAPE_Area",
 					searchCondition: "OFFICIAL_NAME_UPPER = '" + twpInfo.TWP + "'"
 				};
 				geocodeWithagsQuery(params, settings, callback);
@@ -389,7 +445,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			"geocode": function (params, callback) {
 				var twpInfo = getTWPinfo(params.originalAddress);
 				var settings = { 
-					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships1/MapServer",
+					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
 					layerID: 1,
 					displayPolygon: true,  
 					fieldsInInfoWindow: ["GEOG_TWP", "LOT_NUM", "CONCESSION"], 
@@ -398,7 +454,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					}, 
 					latitudeField: "CENY",
 					longitudeField: "CENX",
-					areaField: "AREA",
+					areaField: "SHAPE_Area",
 					searchCondition: "GEOG_TWP" + " = '" + twpInfo.TWP + "' AND CONCESSION = 'CON " + twpInfo.Con + "' AND LOT_NUM = 'LOT " + twpInfo.Lot + "'"
 				};
 
@@ -406,63 +462,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			}
 		}
 	};
-var geocodeWithagsQuery = function (params, settings, callback) {
-	var layer = new gmaps.ags.Layer(settings.mapService + "/" + settings.layerID);
-	var outFields = settings.fieldsInInfoWindow;
-	outFields.push(settings.latitudeField);
-	outFields.push(settings.longitudeField);
-	outFields.push(settings.areaField);
-	var queryParams = {
-		returnGeometry: settings.displayPolygon,
-		where: settings.searchCondition,
-		outFields: outFields
-	};
-	layer.query(queryParams, function (fset) {
-		var size = 0;
-		if(fset){
-			var features = fset.features;
-			size = features.length;
-			
-			if (size > 0) {
-				var attrs = features[0].attributes;
-				var result = {
-					address: params.originalAddress,
-					geocodedAddress: settings.getInfoWindow(attrs)
-				};
-				if(queryParams.returnGeometry) {
-					result.geometry = _.map(features, function(feature) {
-						feature.geometry;
-					});
-				}
-				if (size === 1) {
-					result.latlng = {
-						lat: attrs[settings.latitudeField],
-						lng: attrs[settings.longitudeField]
-					};
-				} else {
-					var totalArea = _.reduce(features, function(total_area, feature) {
-						return feature.attributes[settings.areaField] + total_area;
-					}, 0);
-					var totalLat = _.reduce(features, function(total_lat, feature) {
-						return feature.attributes[settings.latitudeField]* feature.attributes[settings.areaField] + total_lat;
-					}, 0);
-					var totalLng = _.reduce(features, function(total_lng, feature) {
-						return feature.attributes[settings.longitudeField]* feature.attributes[settings.areaField] + total_lng;
-					}, 0);
-					result.latlng = {
-						lat: totalLat/totalArea,
-						lng: totalLng/totalArea
-					};
-				}
-				callback(result, "OK");
-			}else{
-				callback({}, "Error");
-			}
-		}else{
-			callback({}, "Error");
-		}
-	}); 
-};
+
 
 /**
  * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.

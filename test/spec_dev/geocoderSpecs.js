@@ -118,13 +118,14 @@ var geocoder = require("../../app/scripts/geocoder");
             });            
         });
 	    describe('Geocoder can parse a string containing Geographic Township name in Ontario', function () {
-	    	this.timeout(15000);
+	    	this.timeout(150000);
 
 	        it('should parse the Geographic Township in Ontario', function (done) {
 				geocoder.geocode({originalAddress: "Abinger TWP"}, function (result, status) {
 					expect(status).to.equal("OK");
 					expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
 					expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+					expect(result.geometry).to.have.length(1);
 					done();
 				});
 	        });
@@ -133,6 +134,7 @@ var geocoder = require("../../app/scripts/geocoder");
 					expect(status).to.equal("OK");
 					expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
 					expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+					expect(result.geometry).to.have.length(1);
 					done();
 				});
 	        });
@@ -141,6 +143,7 @@ var geocoder = require("../../app/scripts/geocoder");
 					expect(status).to.equal("OK");
 					expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
 					expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+					expect(result.geometry).to.have.length(1);
 					done();
 				});
 	        });
@@ -149,6 +152,7 @@ var geocoder = require("../../app/scripts/geocoder");
 					expect(status).to.equal("OK");
 					expect(Math.abs(result.latlng.lat - 44.9980573)).to.be.below(0.001);
 					expect(Math.abs(result.latlng.lng - (-79.8036325))).to.be.below(0.001);
+					expect(result.geometry).to.have.length(11);
 					done();
 				});
 	        });
@@ -161,32 +165,33 @@ var geocoder = require("../../app/scripts/geocoder");
 	        });
 	    });
 	    describe('Geocoder can parse a string containing Geographic Township name with Lot and Concession in Ontario', function () {
-	    	this.timeout(15000);
+	    	this.timeout(150000);
 	    	
-	        it('should parse the Geographic Township in Ontario', function (done) {
-				geocoder.geocode({originalAddress: "Abinger TWP"}, function (result, status) {
+	        it('should parse the Geographic Township with Lot and Concession in Ontario', function (done) {
+				geocoder.geocode({originalAddress: "Abinger TWP, Lot 8, Con 14"}, function (result, status) {
 					expect(status).to.equal("OK");
-					expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
-					expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lat - 45.067567)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-77.16453))).to.be.below(0.001);
 					done();
 				});
 	        });
-	        it('should parse the Geographic Township in Ontario', function (done) {
-				geocoder.geocode({originalAddress: "ABinger TWP"}, function (result, status) {
+	        it('should parse the Geographic Township with Concession and Lot in Ontario', function (done) {
+				geocoder.geocode({originalAddress: "ABinger TWP, Con 14, Lot 8"}, function (result, status) {
 					expect(status).to.equal("OK");
-					expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
-					expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lat - 45.067567)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-77.16453))).to.be.below(0.001);
 					done();
 				});
 	        });
-	        it('should parse the Geographic Township in Ontario', function (done) {
-				geocoder.geocode({originalAddress: "Abinger Township"}, function (result, status) {
+	        it('should parse the Geographic Township with Lot and Concession in Ontario', function (done) {
+				geocoder.geocode({originalAddress: "Abinger Township, Lot 8, Con 14"}, function (result, status) {
 					expect(status).to.equal("OK");
-					expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
-					expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lat - 45.067567)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-77.16453))).to.be.below(0.001);
 					done();
 				});
 	        });
+	        /*
 	        it('should parse the Geographic Township with multiple polygons in Ontario', function (done) {
 				geocoder.geocode({originalAddress: "Gibson Township"}, function (result, status) {
 					expect(status).to.equal("OK");
@@ -194,10 +199,10 @@ var geocoder = require("../../app/scripts/geocoder");
 					expect(Math.abs(result.latlng.lng - (-79.8036325))).to.be.below(0.001);
 					done();
 				});
-	        });
+	        });*/
 	        
 	        it('should not parse the wrong Geographic Township in Ontario', function (done) {
-				geocoder.geocode({originalAddress: "Apple Township"}, function (result, status) {
+				geocoder.geocode({originalAddress: "Apple Township, Lot 1, Con 2"}, function (result, status) {
 					expect(status).to.equal("Error");
 					done();
 				});
