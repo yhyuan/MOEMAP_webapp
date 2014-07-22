@@ -64,15 +64,15 @@ module.exports = function (grunt) {
         },
 		browserify: {
 			specs: {
-				src: ["web/specs/**/*Specs.js"],
-				dest: "web/public/build/specs.js",
+				src: ["test/spec_dev/**/*Specs.js"],
+				dest: "test/spec/specs.js"/*,
 				options: {
 					bundleOptions: {
 						debug: epa.debug
 					}
-				}
+				}*/
 			}
-		}
+		},
         // The actual grunt server settings
         connect: {
             options: {
@@ -371,6 +371,7 @@ module.exports = function (grunt) {
 
         grunt.task.run([
             'connect:test',
+            'browserify',
             'mocha'
         ]);
     });

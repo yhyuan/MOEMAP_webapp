@@ -1,3 +1,4 @@
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 var regIsFloat = /^(-?\d+)(\.\d+)?$/,
@@ -520,3 +521,44 @@ var api = {
 }
 
 module.exports = api;
+},{}],2:[function(require,module,exports){
+/* global describe, it */
+var geocoder = require("../../app/scripts/geocoder");
+
+(function () {
+    'use strict';
+
+    describe('Geocoder', function () {
+        describe('Geocoder can parse a string containing latitude and longitude in Ontario', function () {
+            it('should parse the latitude and longitude in Ontario', function () {
+				geocoder.geocode({originalAddress: "43.71702, -79.54158"}, function (result, status) {
+					expect(status).to.equal("OK");
+					expect(Math.abs(result.latlng.lat - 43.71702)).to.be.below(0.0001);
+					expect(Math.abs(result.latlng.lng - (-79.54158))).to.be.below(0.0001);
+				});
+            });
+            it('should parse the latitude and longitude in Ontario with revese order', function () {
+				geocoder.geocode({originalAddress: "-79.54158, 43.71702"}, function (result, status) {
+					expect(status).to.equal("OK");
+					expect(Math.abs(result.latlng.lat - 43.71702)).to.be.below(0.0001);
+					expect(Math.abs(result.latlng.lng - (-79.54158))).to.be.below(0.0001);
+				});
+            });
+            it('should parse the latitude and longitude in Ontario with positive longitude', function () {
+				geocoder.geocode({originalAddress: "43.71702, 79.54158"}, function (result, status) {
+					expect(status).to.equal("OK");
+					expect(Math.abs(result.latlng.lat - 43.71702)).to.be.below(0.0001);
+					expect(Math.abs(result.latlng.lng - (-79.54158))).to.be.below(0.0001);
+				});
+            });
+            it('should not parse the latitude and longitude outside Ontario', function () {
+				geocoder.geocode({originalAddress: "43.19040, -77.57275"}, function (result, status) {
+					expect(status).to.equal("Error");
+				});
+            });            
+        });
+    });
+
+})();
+
+},{"../../app/scripts/geocoder":1}]},{},[2]);
