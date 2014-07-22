@@ -62,7 +62,17 @@ module.exports = function (grunt) {
                 ]
             }
         },
-
+		browserify: {
+			specs: {
+				src: ["web/specs/**/*Specs.js"],
+				dest: "web/public/build/specs.js",
+				options: {
+					bundleOptions: {
+						debug: epa.debug
+					}
+				}
+			}
+		}
         // The actual grunt server settings
         connect: {
             options: {
