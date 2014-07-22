@@ -2,6 +2,13 @@
 'use strict';
 
 var regIsFloat = /^(-?\d+)(\.\d+)?$/,
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 	replaceChar = function (str, charA, charB) {
 		var temp = [];
 		temp = str.split(charA);
@@ -12,7 +19,14 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			}
 		}
 		return result;
-	}, 
+	},
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */ 
 	//http://appdelegateinc.com/blog/2010/05/16/point-in-polygon-checking/
 	// Ray Cast Point in Polygon extension for Google Maps GPolygon
 	// App Delegate Inc <htttp://appdelegateinc.com> 2010
@@ -36,17 +50,26 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			j = i;
 		}
 		return inPoly;
-		/*
-		return {
-			success: inPoly,
-			latlng: latlng
-		};*/
 	},
+	/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 	validateUTMInRange = function (utmCoors, UTMRange) {
 		var northing = utmCoors.northing;
 		var easting = utmCoors.easting;
 		return ((easting < UTMRange.maxEasting) && (easting > UTMRange.minEasting) && (northing < UTMRange.maxNorthing) && (northing > UTMRange.minNorthing));
 	},
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 	convertUTMtoLatLng = function (utmCoors) {
 		var zone = utmCoors.zone;
 		var north = utmCoors.northing;
@@ -104,6 +127,13 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 		};
 		return res;
 	},
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 	parseLatLngSymbols = function (val, s1, s2, s3) {
 		var parseDMS = function (s, unparsed) {
 			var res = {
@@ -147,6 +177,13 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 		result = Math.abs(result);
 		return result;
 	},
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 //Private method: parse the input to get Lot, Concession
 	processLotCon = function (arr1) {
 		if (arr1.length !== 2) {
@@ -185,7 +222,13 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			success: true
 		};
 	},
-
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 //Private method: parse the input to get Township, Lot, Concession by calling processLotCon
 	preprocessTWP = function (coors_Up) {
 		var res = {
@@ -225,10 +268,24 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 		}
 		return res;
 	},
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
 	getTWPinfo = function (originalAddress) {
 		return preprocessTWP(replaceChar(originalAddress, ',', ' ').trim().split(/\s+/).join(' ').toUpperCase()); 
 	},
-	geocodeWithagsQuery = function (params, settings, callback) {
+/**
+ * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
+ * called to convert it to geocoding params. 
+ *
+ * @param {string} d The address to be geocoded.
+ * @return {object} An ojbect sendt to geocoder.
+ */
+	geocodeByQuery = function (params, settings, callback) {
 		var layer = new gmaps.ags.Layer(settings.mapService + "/" + settings.layerID);
 		var outFields = settings.fieldsInInfoWindow;
 		outFields.push(settings.latitudeField);
@@ -435,7 +492,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					areaField: "SHAPE_Area",
 					searchCondition: "OFFICIAL_NAME_UPPER = '" + twpInfo.TWP + "'"
 				};
-				geocodeWithagsQuery(params, settings, callback);
+				geocodeByQuery(params, settings, callback);
 			}
 		},
 		"GeographicTownshipWithLotConcession" : {
@@ -458,8 +515,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					areaField: "SHAPE_Area",
 					searchCondition: "GEOG_TWP" + " = '" + twpInfo.TWP + "' AND CONCESSION = 'CON " + twpInfo.Con + "' AND LOT_NUM = 'LOT " + twpInfo.Lot + "'"
 				};
-
-				geocodeWithagsQuery(params, settings, callback);
+				geocodeByQuery(params, settings, callback);
 			}
 		}
 	};
@@ -475,7 +531,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 function geocode(initParams, callback) {
 	var defaultParams = {
 		//originalAddress: originalAddress, 
-		geocoderList: geocoderList, 
+		geocoderList: (!!initParams.geocoderList) ? _.defaults(initParams.geocoderList, geocoderList) : geocoderList, 
 		regionBoundary: [{x: -95.29920350, y: 48.77505703},{x: -95.29920350, y: 53.07150598}, 	{x: -89.02502409, y: 56.95876930}, 	{x: -87.42238044, y: 56.34499088}, 	{x: -86.36531760, y: 55.93580527}, 	{x: -84.69447635, y: 55.45842206}, 	{x: -81.89837466, y: 55.35612565}, 	{x: -81.96657226, y: 53.17380238}, 	{x: -80.84131182, y: 52.28723355}, 	{x: -79.98884179, y: 51.80985033}, 	{x: -79.34096457, y: 51.74165273}, 	{x: -79.34096457, y: 47.54750019}, 	{x: -78.55669214, y: 46.49043736}, 	{x: -76.61306048, y: 46.14944935}, 	{x: -75.59009645, y: 45.77436253}, 	{x: -74.12384800, y: 45.91075774}, 	{x: -73.98745279, y: 45.02418891}, 	{x: -75.07861443, y: 44.61500329}, 	{x: -75.86288685, y: 44.03532368}, 	{x: -76.88585089, y: 43.69433566}, 	{x: -79.20, y: 43.450196}, 	{x: -78.62488975, y: 42.94416204}, 	{x: -79.54555738, y: 42.43268002}, 	{x: -81.28459623, y: 42.15988961}, 	{x: -82.54625188, y: 41.58020999}, 	{x: -83.26232670, y: 41.95529681}, 	{x: -83.36462310, y: 42.43268002}, 	{x: -82.61444948, y: 42.73956923}, 	{x: -82.17116506, y: 43.59203926}, 	{x: -82.61444948, y: 45.36517692}, 	{x: -84.08069793, y: 45.91075774}, 	{x: -84.93316796, y: 46.69503016}, 	{x: -88.27485047, y: 48.22947621}, 	{x: -89.33191330, y: 47.78619180}, 	{x: -90.32077854, y: 47.68389540}, 	{x: -92.09391619, y: 47.95668581}, 	{x: -94.07164666, y: 48.33177262}, 	{x: -95.29920350, y: 48.77505703}],
 		UTMRange: {
 			minEasting: 258030.3,
@@ -498,37 +554,26 @@ function geocode(initParams, callback) {
 			return {lat: lat, lng: lng};
 		}
 	};
-
 	var params = _.defaults(initParams, defaultParams);
-	var geocoder = _.find(_.values(params.geocoderList), function(geocoder){ 
-		return geocoder.match(params);
-	});
-	if(!!geocoder) {
-		geocoder.geocode(params, callback)
+	/*if (!!initParams.geocoderList) {
+		params.geocoderList = params.geocoderList.concat(initParams.geocoderList);
+	}*/
+	if (!!params.latlng && !!params.latlng.lat && !!params.latlng.lng && !!params.reverseGeocoder) {
+		params.reverseGeocoder(params, callback);
 	} else {
-		callback({}, "Error");
-	}
-}
-
-/**
- * Reverse geocode a location with latitude & longitude. 
- * If it cantains lat and lng as its properties, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
- * called to convert it to geocoding params. 
- *
- * @param {string} d The address to be geocoded.
- * @return {object} An ojbect sendt to geocoder.
- */
-var reverseGeocode = function (params) {
-	if ((!!params) && params.hasOwnProperty('lat') && params.hasOwnProperty('lng')) {
-		reverseGeocode(params);
-	} else {
-		params.errback(params);
+		var geocoder = _.find(_.values(params.geocoderList), function(geocoder){ 
+			return geocoder.match(params);
+		});
+		if(!!geocoder) {
+			geocoder.geocode(params, callback)
+		} else {
+			callback({}, "Error");
+		}
 	}
 }
 
 var api = {
-	geocode: geocode,
-	reverseGeocode: reverseGeocode
+	geocode: geocode
 }
 
 module.exports = api;
@@ -736,13 +781,56 @@ var geocoder = require("../../app/scripts/geocoder");
 				});
 	        });*/
 	        
-	        it('should not parse the wrong Geographic Township in Ontario', function (done) {
+	        it('should not parse the wrong Geographic Township with Lot and Concession in Ontario', function (done) {
 				geocoder.geocode({originalAddress: "Apple Township, Lot 1, Con 2"}, function (result, status) {
 					expect(status).to.equal("Error");
 					done();
 				});
 	        });
 	    });
+	    describe('Geocoder can parse a string with geocoder provided by caller', function () {
+	    	this.timeout(150000);	    	
+	        it('should parse the Geographic Township with Lot and Concession in Ontario', function (done) {
+				geocoder.geocode({
+					originalAddress: "Dummy address", 
+					geocoderList: {
+						"DummyGeocoder" : {
+							"match": function (params) {
+								return params.originalAddress === "Dummy address";
+							},
+							"geocode": function (params, callback) {
+								setTimeout(callback(
+									{
+										latlng:
+											{
+												lat: 45.067567,
+												lng: -77.16453
+											}, 
+										status: 
+											"OK"
+									}), 100);
+							}
+						}
+					}
+				}, function (result, status) {
+					expect(status).to.equal("OK");
+					expect(Math.abs(result.latlng.lat - 45.067567)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-77.16453))).to.be.below(0.001);
+					done();
+				});
+	        });
+	    });
+	    describe('Geocoder can reverse a latitude, longitude to address with a reverse geocoder provided by caller', function () {
+	    	this.timeout(150000);	    	
+	        it('should parse the Geographic Township with Lot and Concession in Ontario', function (done) {
+				geocoder.geocode({originalAddress: "Abinger TWP, Lot 8, Con 14"}, function (result, status) {
+					expect(status).to.equal("OK");
+					expect(Math.abs(result.latlng.lat - 45.067567)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-77.16453))).to.be.below(0.001);
+					done();
+				});
+	        });
+	    });	    
     });
 })();
 
