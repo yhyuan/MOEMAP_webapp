@@ -37,15 +37,15 @@ var geocoder = require("../../app/scripts/geocoder");
             it('should parse the latitude and longitude in Ontario', function () {
 				geocoder.geocode({originalAddress: "43°42'37.05\", 79°32'28.92\""}, function (result, status) {
 					expect(status).to.equal("OK");
-					expect(Math.abs(result.latlng.lat - 43.71051)).to.be.below(0.001);
-					expect(Math.abs(result.latlng.lng - (-79.53945))).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lat - 43.71029)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-79.541366))).to.be.below(0.001);
 				});
             });
             it('should parse the latitude and longitude in Ontario with revese order', function () {
 				geocoder.geocode({originalAddress: "79°32'28.92\", 43°42'37.05\""}, function (result, status) {
 					expect(status).to.equal("OK");
-					expect(Math.abs(result.latlng.lat - 43.71051)).to.be.below(0.001);
-					expect(Math.abs(result.latlng.lng - (-79.53945))).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lat - 43.71029)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-79.541366))).to.be.below(0.001);
 				});
             });
             it('should not parse the latitude and longitude outside Ontario', function () {
@@ -58,15 +58,15 @@ var geocoder = require("../../app/scripts/geocoder");
             it('should parse the latitude and longitude in Ontario', function () {
 				geocoder.geocode({originalAddress: "43d42m37.05s, 79d32m28.92s"}, function (result, status) {
 					expect(status).to.equal("OK");
-					expect(Math.abs(result.latlng.lat - 43.71051)).to.be.below(0.001);
-					expect(Math.abs(result.latlng.lng - (-79.53945))).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lat - 43.71029)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-79.541366))).to.be.below(0.001);
 				});
             });
             it('should parse the latitude and longitude in Ontario with revese order', function () {
 				geocoder.geocode({originalAddress: "79d32m28.92s, 43d42m37.05s"}, function (result, status) {
 					expect(status).to.equal("OK");
-					expect(Math.abs(result.latlng.lat - 43.71051)).to.be.below(0.001);
-					expect(Math.abs(result.latlng.lng - (-79.53945))).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lat - 43.71029)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-79.541366))).to.be.below(0.001);
 				});
             });
             it('should not parse the latitude and longitude outside Ontario', function () {
@@ -79,22 +79,22 @@ var geocoder = require("../../app/scripts/geocoder");
             it('should parse the UTM coordinate within default zone: 17 in Ontario', function () {
 				geocoder.geocode({originalAddress: "617521.28, 4840730.67"}, function (result, status) {
 					expect(status).to.equal("OK");
-					expect(Math.abs(result.latlng.lat - 43.71051)).to.be.below(0.001);
-					expect(Math.abs(result.latlng.lng - (-79.53945))).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lat - 43.710291)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-79.54126))).to.be.below(0.001);
 				});
             });
             it('should parse the UTM coordinate with reverse order within default zone: 17 in Ontario', function () {
 				geocoder.geocode({originalAddress: "4840730.67, 617521.28"}, function (result, status) {
 					expect(status).to.equal("OK");
-					expect(Math.abs(result.latlng.lat - 43.71051)).to.be.below(0.001);
-					expect(Math.abs(result.latlng.lng - (-79.53945))).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lat - 43.710291)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-79.54126))).to.be.below(0.001);
 				});
             });
             it('should parse the UTM coordinate in Ontario', function () {
 				geocoder.geocode({originalAddress: "17, 4840730.67, 617521.28"}, function (result, status) {
 					expect(status).to.equal("OK");
-					expect(Math.abs(result.latlng.lat - 43.71051)).to.be.below(0.001);
-					expect(Math.abs(result.latlng.lng - (-79.53945))).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lat - 43.710291)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-79.54126))).to.be.below(0.001);
 				});
             });
             it('should parse the UTM coordinate in zone 18 in Ontario', function () {
@@ -118,5 +118,36 @@ var geocoder = require("../../app/scripts/geocoder");
             });            
         });
     });
-
+    describe('Geocoder can parse a string containing Geographic Township name in Ontario', function () {
+        it('should parse the Geographic Township in Ontario', function () {
+			geocoder.geocode({originalAddress: "Abinger TWP"}, function (result, status) {
+				expect(status).to.equal("OK");
+				expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
+				expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+				done();
+			});
+        });
+        it('should parse the Geographic Township in Ontario', function () {
+			geocoder.geocode({originalAddress: "ABinger TWP"}, function (result, status) {
+				expect(status).to.equal("OK");
+				expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
+				expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+				done();
+			});
+        });
+        it('should parse the Geographic Township in Ontario', function () {
+			geocoder.geocode({originalAddress: "Abinger Township"}, function (result, status) {
+				expect(status).to.equal("OK");
+				expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
+				expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+				done();
+			});
+        });
+        it('should not parse the wrong Geographic Township in Ontario', function () {
+			geocoder.geocode({originalAddress: "Apple Township"}, function (result, status) {
+				expect(status).to.equal("Error");
+				done();
+			});
+        });
+    });
 })();
