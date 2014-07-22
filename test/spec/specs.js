@@ -224,7 +224,10 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			}
 		}
 		return res;
-	}, 
+	},
+	getTWPinfo = function (originalAddress) {
+		return preprocessTWP(replaceChar(originalAddress, ',', ' ').trim().split(/\s+/).join(' ').toUpperCase()); 
+	},
 	geocoderList = {
 		"LatLngInDecimalDegree" : {
 			"match": function (params) {
@@ -358,68 +361,47 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 		},
 		"GeographicTownship" : {
 			"match": function (params) {
-				var coorsArray = replaceChar(params.originalAddress, ',', ' ').trim().split(/\s+/);
-				var coors_Up = coorsArray.join(' ').toUpperCase();
-				var twpInfo = preprocessTWP(coors_Up);
-				if (twpInfo.success && twpInfo.isTWPOnly) {
-					var parsedAddress = {
-						geographicTownship: twpInfo.TWP,
-					};
-					this.settings.searchCondition = this.settings.getSearchCondition(parsedAddress);
-					return true;
-				}
-				return false;
-			},
-			settings: {
-				mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
-				layerID: 0,
-				displayPolygon: true,  
-				fieldsInInfoWindow: ["OFFICIAL_NAME"], 
-				getInfoWindow: function(attributes){
-					return "<strong>" + attributes.OFFICIAL_NAME + "</strong>";
-				}, 
-				latitude: "CENY",
-				longitude: "CENX",
-				getSearchCondition: function(parsedAddress){
-					return "OFFICIAL_NAME_UPPER = '" + parsedAddress.geographicTownship + "'";
-				}				
+				var twpInfo = getTWPinfo(params.originalAddress);
+				return (twpInfo.success && twpInfo.isTWPOnly);
 			},
 			"geocode": function (params, callback) {
-				geocodeWithagsQuery(this.settings, callback);
+				var twpInfo = getTWPinfo(params.originalAddress);
+				var settings = {
+					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
+					layerID: 0,
+					displayPolygon: false,  
+					fieldsInInfoWindow: ["OFFICIAL_NAME"], 
+					getInfoWindow: function(attributes){
+						return "<strong>" + attributes.OFFICIAL_NAME + "</strong>";
+					}, 
+					latitude: "CENY",
+					longitude: "CENX",
+					searchCondition: "OFFICIAL_NAME_UPPER = '" + twpInfo.TWP + "'"
+				};
+				geocodeWithagsQuery(params, settings, callback);
 			}
 		},
 		"GeographicTownshipWithLotConcession" : {
 			"match": function (params) {
-				var coorsArray = replaceChar(params.originalAddress, ',', ' ').trim().split(/\s+/);
-				var coors_Up = coorsArray.join(' ').toUpperCase();
-				var twpInfo = preprocessTWP(coors_Up);
-				if (twpInfo.success && (!twpInfo.isTWPOnly)) {
-					var parsedAddress = {
-						geographicTownship: twpInfo.TWP,
-						lot: twpInfo.Lot,
-						con: twpInfo.Con
-					};
-					this.settings.searchCondition = this.settings.getSearchCondition(parsedAddress);
-					return true;
-				}
-				return false;
+				var twpInfo = getTWPinfo(params.originalAddress);
+				return (twpInfo.success && (!twpInfo.isTWPOnly));
 			},
-			settings: { 
-				mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
-				layerID: 1,
-				displayPolygon: true,  
-				fieldsInInfoWindow: ["GEOG_TWP", "LOT_NUM", "CONCESSION"], 
-				getInfoWindow: function(attributes){
-					return "<strong>" + attributes.GEOG_TWP + " " + attributes.LOT_NUM + " " + attributes.CONCESSION + "</strong>";
-				}, 
-				latitude: "CENY",
-				longitude: "CENX",
-				getSearchCondition: function(parsedAddress){
-					return "GEOG_TWP" + " = '" + parsedAddress.geographicTownship + "' AND CONCESSION = 'CON " + parsedAddress.con + "' AND LOT_NUM = 'LOT " + parsedAddress.lot + "'";
-				}
-			},		
 			"geocode": function (params, callback) {
-				geocodeWithagsQuery(params, this.settings, callback);
+				var twpInfo = getTWPinfo(params.originalAddress);
+				var settings = { 
+					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
+					layerID: 1,
+					displayPolygon: true,  
+					fieldsInInfoWindow: ["GEOG_TWP", "LOT_NUM", "CONCESSION"], 
+					getInfoWindow: function(attributes){
+						return "<strong>" + attributes.GEOG_TWP + " " + attributes.LOT_NUM + " " + attributes.CONCESSION + "</strong>";
+					}, 
+					latitude: "CENY",
+					longitude: "CENX",
+					searchCondition: "GEOG_TWP" + " = '" + twpInfo.TWP + "' AND CONCESSION = 'CON " + twpInfo.Con + "' AND LOT_NUM = 'LOT " + twpInfo.Lot + "'"
+				};
+
+				geocodeWithagsQuery(params, settings, callback);
 			}
 		}
 	};
@@ -436,30 +418,43 @@ var geocodeWithagsQuery = function (params, settings, callback) {
 	layer.query(queryParams, function (fset) {
 		var size = 0;
 		if(fset){
-			size = fset.features.length;
+			size = fset.features.length;			
 			if (size > 0) {
-				queryParams.address = settings.getInfoWindow(fset.features[0].attributes);
-				if(queryParams.returnGeometry){
+				if (size === 1) {
+					var attrs = fset.features[0].attributes;					
+					var result = {
+						latlng: {
+							lat: attrs[settings.latitude],
+							lng: attrs[settings.longitude]
+						},
+						address: params.originalAddress,
+						geocodedAddress: settings.getInfoWindow(attrs)
+					}
+					callback(result, "OK");
+				}
+
+				//console.log(fset);
+				//if(queryParams.returnGeometry){
 					/*var centroid = returnCentroidAndPolyline(fset, latField, lngField);
 					queryParams.gLatLng = centroid.gLatLng;
 					queryParams.polylines = centroid.polylines;
 					queryParams.callback(queryParams);
 					*/
-					callback(fset);
-				}else{
+				//	callback({}, "OK");
+				//}else{
 					/*var centroid2 = returnCentroid(fset, latField, lngField);
 					queryParams.gLatLng = centroid2.gLatLng;
 					queryParams.callback(queryParams);
 					*/
-					callback(fset);
-				}
+					//callback({}, "OK");
+				//}
 			}else{
 				callback({}, "Error");
 			}
 		}else{
 			callback({}, "Error");
 		}
-	});
+	}); 
 };
 
 /**
@@ -649,38 +644,40 @@ var geocoder = require("../../app/scripts/geocoder");
 				});
             });            
         });
-    });
-    describe('Geocoder can parse a string containing Geographic Township name in Ontario', function () {
-        it('should parse the Geographic Township in Ontario', function () {
-			geocoder.geocode({originalAddress: "Abinger TWP"}, function (result, status) {
-				expect(status).to.equal("OK");
-				expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
-				expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
-				done();
-			});
-        });
-        it('should parse the Geographic Township in Ontario', function () {
-			geocoder.geocode({originalAddress: "ABinger TWP"}, function (result, status) {
-				expect(status).to.equal("OK");
-				expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
-				expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
-				done();
-			});
-        });
-        it('should parse the Geographic Township in Ontario', function () {
-			geocoder.geocode({originalAddress: "Abinger Township"}, function (result, status) {
-				expect(status).to.equal("OK");
-				expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
-				expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
-				done();
-			});
-        });
-        it('should not parse the wrong Geographic Township in Ontario', function () {
-			geocoder.geocode({originalAddress: "Apple Township"}, function (result, status) {
-				expect(status).to.equal("Error");
-				done();
-			});
-        });
+	    describe('Geocoder can parse a string containing Geographic Township name in Ontario', function () {
+	        it('should parse the Geographic Township in Ontario', function (done) {
+				geocoder.geocode({originalAddress: "Abinger TWP"}, function (result, status) {
+					expect(status).to.equal("OK");
+					console.log(result);
+					expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+					done();
+				});
+	        });
+	        it('should parse the Geographic Township in Ontario', function (done) {
+				geocoder.geocode({originalAddress: "ABinger TWP"}, function (result, status) {
+					expect(status).to.equal("OK");
+					expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+					done();
+				});
+	        });
+	        it('should parse the Geographic Township in Ontario', function (done) {
+				geocoder.geocode({originalAddress: "Abinger Township"}, function (result, status) {
+					expect(status).to.equal("OK");
+					expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+					done();
+				});
+	        });
+	        
+	        it('should not parse the wrong Geographic Township in Ontario', function () {
+				geocoder.geocode({originalAddress: "Apple Township"}, function (result, status) {
+					expect(status).to.equal("Error");
+					done();
+				});
+	        });
+	    });
     });
 })();
 
