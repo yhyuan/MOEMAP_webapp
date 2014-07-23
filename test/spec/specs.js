@@ -789,29 +789,24 @@ var geocoder = require("../../app/scripts/geocoder");
 	        });
 	    });
 	    describe('Geocoder can parse a string with geocoder provided by caller', function () {
-	    	this.timeout(150000);	    	
-	        it('should parse the Geographic Township with Lot and Concession in Ontario', function (done) {
-				geocoder.geocode({
-					originalAddress: "Dummy address", 
-					geocoderList: {
-						"DummyGeocoder" : {
-							"match": function (params) {
-								return params.originalAddress === "Dummy address";
-							},
-							"geocode": function (params, callback) {
-								setTimeout(callback(
-									{
-										latlng:
-											{
-												lat: 45.067567,
-												lng: -77.16453
-											}, 
-										status: 
-											"OK"
-									}), 100);
-							}
+	    	//this.timeout(15000);	    	
+	        it('should parse the dummy address with the provided dummy geocoder', function (done) {
+	        	var geocoderList = {
+					"DummyGeocoder" : {
+						"match": function (params) {							
+							return params.originalAddress === "Dummy address";
+						},
+						"geocode": function (params, callback) {
+							setTimeout(callback(
+								{
+									latlng:{lat: 45.067567,lng: -77.16453}
+								}, "OK"), 100);
 						}
 					}
+				};
+				geocoder.geocode({
+					originalAddress: "Dummy address", 
+					geocoderList: geocoderList
 				}, function (result, status) {
 					expect(status).to.equal("OK");
 					expect(Math.abs(result.latlng.lat - 45.067567)).to.be.below(0.001);
@@ -821,12 +816,19 @@ var geocoder = require("../../app/scripts/geocoder");
 	        });
 	    });
 	    describe('Geocoder can reverse a latitude, longitude to address with a reverse geocoder provided by caller', function () {
-	    	this.timeout(150000);	    	
-	        it('should parse the Geographic Township with Lot and Concession in Ontario', function (done) {
-				geocoder.geocode({originalAddress: "Abinger TWP, Lot 8, Con 14"}, function (result, status) {
+	        it('should reverse geocode a latitude, longitude to an address', function (done) {
+	        	var reverseGeocoder = function(params, callback) {
+					setTimeout(callback(
+						{
+							address:"Dummy address"
+						}, "OK"), 100);
+	        	};
+				geocoder.geocode({
+									latlng:{lat: 45.067567,lng: -77.16453},
+									reverseGeocoder: reverseGeocoder
+								}, function (result, status) {
 					expect(status).to.equal("OK");
-					expect(Math.abs(result.latlng.lat - 45.067567)).to.be.below(0.001);
-					expect(Math.abs(result.latlng.lng - (-77.16453))).to.be.below(0.001);
+					expect(result.address).to.equal("Dummy address");
 					done();
 				});
 	        });
