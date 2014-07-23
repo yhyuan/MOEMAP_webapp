@@ -285,7 +285,8 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
  * @return {object} An ojbect sendt to geocoder.
  */
 	geocodeByQuery = function (params, settings, callback) {
-		var layer = new gmaps.ags.Layer(settings.mapService + "/" + settings.layerID);
+		//var layer = new gmaps.ags.Layer(settings.mapService + "/" + settings.layerID);
+		var layer = params.getLayer(settings.mapService, settings.layerID);
 		var outFields = settings.fieldsInInfoWindow;
 		outFields.push(settings.latitudeField);
 		outFields.push(settings.longitudeField);
@@ -564,9 +565,13 @@ function geocode(initParams, callback) {
 			return geocoder.match(params);
 		});
 		if(!!geocoder) {
-			geocoder.geocode(params, callback)
+			geocoder.geocode(params, callback);
 		} else {
-			callback({}, "Error");
+			if (!!params.defaultGeocoder) {
+				params.defaultGeocoder(params, callback);
+			} else {
+				callback({}, "Error");
+			}
 		}
 	}
 }
