@@ -274,8 +274,8 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
  * @param {string} d The address to be geocoded.
  * @return {object} An ojbect sendt to geocoder.
  */
-	getTWPinfo = function (originalAddress) {
-		return preprocessTWP(replaceChar(originalAddress, ',', ' ').trim().split(/\s+/).join(' ').toUpperCase()); 
+	getTWPinfo = function (address) {
+		return preprocessTWP(replaceChar(address, ',', ' ').trim().split(/\s+/).join(' ').toUpperCase()); 
 	},
 /**
  * Geocode an address string or geocoding Params. If it is an address string, createGeocodeParams is Creates a geocoding Params object using the default setting in Geocoder.
@@ -304,7 +304,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				if (size > 0) {
 					var attrs = features[0].attributes;
 					var result = {
-						address: params.originalAddress,
+						address: params.address,
 						geocodedAddress: settings.getInfoWindow(attrs)
 					};
 					if(queryParams.returnGeometry) {
@@ -344,7 +344,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 	geocoderList = {
 		"LatLngInDecimalDegree" : {
 			"match": function (params) {
-				var coorsArray = replaceChar(params.originalAddress, ',', ' ').trim().split(/\s+/);
+				var coorsArray = replaceChar(params.address, ',', ' ').trim().split(/\s+/);
 				if ((coorsArray.length === 2) && regIsFloat.test(coorsArray[0]) && regIsFloat.test(coorsArray[1])) {
 					var v0 = Math.abs(parseFloat(coorsArray[0]));
 					var v1 = Math.abs(parseFloat(coorsArray[1]));
@@ -356,14 +356,14 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			"geocode": function (params, callback) {
 				callback({
 					latlng: this.latlng,
-					address: params.originalAddress
+					address: params.address
 				}, "OK");
 			}
 		},
 		"LatLngInSymbols" : {
 			"match": function (params) {
 				var degreeSym = String.fromCharCode(176);
-				var coorsArray = replaceChar(params.originalAddress, ',', ' ').trim().split(/\s+/);
+				var coorsArray = replaceChar(params.address, ',', ' ').trim().split(/\s+/);
 				if ((coorsArray.length === 2) && ((coorsArray[0]).indexOf(degreeSym) > 0) && ((coorsArray[1]).indexOf(degreeSym) > 0)) {
 					var v0 = parseLatLngSymbols(coorsArray[0], degreeSym, "'", "\"");
 					var v1 = parseLatLngSymbols(coorsArray[1], degreeSym, "'", "\"");
@@ -375,13 +375,13 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			"geocode": function (params, callback) {
 				callback({
 					latlng: this.latlng,
-					address: params.originalAddress
+					address: params.address
 				}, "OK");
 			}
 		},
 		"LatLngInDMSSymbols" : {
 			"match": function (params) {
-				var coorsArray = replaceChar(params.originalAddress, ',', ' ').trim().split(/\s+/);
+				var coorsArray = replaceChar(params.address, ',', ' ').trim().split(/\s+/);
 				if (coorsArray.length === 2) {
 					var str1 = (coorsArray[0]).toUpperCase();
 					var str2 = (coorsArray[1]).toUpperCase();
@@ -405,13 +405,13 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			"geocode": function (params, callback) {
 				callback({
 					latlng: this.latlng,
-					address: params.originalAddress
+					address: params.address
 				}, "OK");
 			}
 		},
 		"UTMInDefaultZone" : {
 			"match": function (params) {
-				var coorsArray = replaceChar(params.originalAddress, ',', ' ').trim().split(/\s+/);
+				var coorsArray = replaceChar(params.address, ',', ' ').trim().split(/\s+/);
 				if ((coorsArray.length === 2) && regIsFloat.test(coorsArray[0]) && regIsFloat.test(coorsArray[1])) {
 					var v1 = Math.abs(parseFloat(coorsArray[0]));
 					var v2 = Math.abs(parseFloat(coorsArray[1]));
@@ -430,13 +430,13 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			"geocode": function (params, callback) {
 				callback({
 					latlng: this.latlng,
-					address: params.originalAddress
+					address: params.address
 				}, "OK");
 			}
 		},
 		"UTM" : {
 			"match": function (params) {
-				var coorsArray = replaceChar(params.originalAddress, ',', ' ').trim().split(/\s+/);
+				var coorsArray = replaceChar(params.address, ',', ' ').trim().split(/\s+/);
 				if (coorsArray.length === 3) {
 					var coorsArrayNoComma = _.map(coorsArray, function (item) {
 						return item.replace(",", " ").trim();
@@ -468,17 +468,17 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			"geocode": function (params, callback) {
 				callback({
 					latlng: this.latlng,
-					address: params.originalAddress
+					address: params.address
 				}, "OK");
 			}
 		},
 		"GeographicTownship" : {
 			"match": function (params) {
-				var twpInfo = getTWPinfo(params.originalAddress);
+				var twpInfo = getTWPinfo(params.address);
 				return (twpInfo.success && twpInfo.isTWPOnly);
 			},
 			"geocode": function (params, callback) {
-				var twpInfo = getTWPinfo(params.originalAddress);
+				var twpInfo = getTWPinfo(params.address);
 				var settings = {
 					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
 					layerID: 0,
@@ -497,11 +497,11 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 		},
 		"GeographicTownshipWithLotConcession" : {
 			"match": function (params) {
-				var twpInfo = getTWPinfo(params.originalAddress);
+				var twpInfo = getTWPinfo(params.address);
 				return (twpInfo.success && (!twpInfo.isTWPOnly));
 			},
 			"geocode": function (params, callback) {
-				var twpInfo = getTWPinfo(params.originalAddress);
+				var twpInfo = getTWPinfo(params.address);
 				var settings = { 
 					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
 					layerID: 1,
@@ -530,7 +530,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
  */
 function geocode(initParams, callback) {
 	var defaultParams = {
-		//originalAddress: originalAddress, 
+		//address: address, 
 		geocoderList: (!!initParams.geocoderList) ? _.defaults(initParams.geocoderList, geocoderList) : geocoderList, 
 		regionBoundary: [{x: -95.29920350, y: 48.77505703},{x: -95.29920350, y: 53.07150598}, 	{x: -89.02502409, y: 56.95876930}, 	{x: -87.42238044, y: 56.34499088}, 	{x: -86.36531760, y: 55.93580527}, 	{x: -84.69447635, y: 55.45842206}, 	{x: -81.89837466, y: 55.35612565}, 	{x: -81.96657226, y: 53.17380238}, 	{x: -80.84131182, y: 52.28723355}, 	{x: -79.98884179, y: 51.80985033}, 	{x: -79.34096457, y: 51.74165273}, 	{x: -79.34096457, y: 47.54750019}, 	{x: -78.55669214, y: 46.49043736}, 	{x: -76.61306048, y: 46.14944935}, 	{x: -75.59009645, y: 45.77436253}, 	{x: -74.12384800, y: 45.91075774}, 	{x: -73.98745279, y: 45.02418891}, 	{x: -75.07861443, y: 44.61500329}, 	{x: -75.86288685, y: 44.03532368}, 	{x: -76.88585089, y: 43.69433566}, 	{x: -79.20, y: 43.450196}, 	{x: -78.62488975, y: 42.94416204}, 	{x: -79.54555738, y: 42.43268002}, 	{x: -81.28459623, y: 42.15988961}, 	{x: -82.54625188, y: 41.58020999}, 	{x: -83.26232670, y: 41.95529681}, 	{x: -83.36462310, y: 42.43268002}, 	{x: -82.61444948, y: 42.73956923}, 	{x: -82.17116506, y: 43.59203926}, 	{x: -82.61444948, y: 45.36517692}, 	{x: -84.08069793, y: 45.91075774}, 	{x: -84.93316796, y: 46.69503016}, 	{x: -88.27485047, y: 48.22947621}, 	{x: -89.33191330, y: 47.78619180}, 	{x: -90.32077854, y: 47.68389540}, 	{x: -92.09391619, y: 47.95668581}, 	{x: -94.07164666, y: 48.33177262}, 	{x: -95.29920350, y: 48.77505703}],
 		UTMRange: {
