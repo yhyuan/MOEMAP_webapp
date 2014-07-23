@@ -771,15 +771,16 @@ var geocoder = require("../../app/scripts/geocoder");
 					done();
 				});
 	        });
-	        /*
+	        
 	        it('should parse the Geographic Township with multiple polygons in Ontario', function (done) {
-				geocoder.geocode({originalAddress: "Gibson Township"}, function (result, status) {
+				geocoder.geocode({originalAddress: "North Crosby Township, Lot 1, Con 9"}, function (result, status) {
 					expect(status).to.equal("OK");
-					expect(Math.abs(result.latlng.lat - 44.9980573)).to.be.below(0.001);
-					expect(Math.abs(result.latlng.lng - (-79.8036325))).to.be.below(0.001);
+					console.log(result.latlng);
+					expect(Math.abs(result.latlng.lat - 44.610877)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-76.3844359))).to.be.below(0.001);
 					done();
 				});
-	        });*/
+	        });
 	        
 	        it('should not parse the wrong Geographic Township with Lot and Concession in Ontario', function (done) {
 				geocoder.geocode({originalAddress: "Apple Township, Lot 1, Con 2"}, function (result, status) {
