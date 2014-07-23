@@ -284,7 +284,8 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
  * @param {string} d The address to be geocoded.
  * @return {object} An ojbect sendt to geocoder.
  */
-	geocodeByQuery = function (params, settings, callback) {
+	//geocodeByQuery = function (params, settings, callback) {
+	geocodeByQuery = function (params, settings) {
 		var layer = new gmaps.ags.Layer(settings.mapService + "/" + settings.layerID);
 		var outFields = settings.fieldsInInfoWindow;
 		outFields.push(settings.latitudeField);
@@ -331,12 +332,15 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 							lng: totalLng/totalArea
 						};
 					}
-					callback(result, "OK");
+					//allback(result, "OK");
+					params.Deferred.resolve(result);
 				}else{
-					callback({}, "Error");
+					params.Deferred.reject({});
+					//callback({}, "Error");
 				}
 			}else{
-				callback({}, "Error");
+				params.Deferred.reject({});
+				//callback({}, "Error");
 			}
 		}); 
 	},
@@ -352,12 +356,20 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params, callback) {
+			"geocode": function (params) {
+				setTimeout(function() {
+					params.Deferred.resolve({
+						latlng: this.latlng,
+						address: params.originalAddress
+					});
+				}, 1);
+			}
+			/*"geocode": function (params, callback) {
 				callback({
 					latlng: this.latlng,
 					address: params.originalAddress
 				}, "OK");
-			}
+			}*/
 		},
 		"LatLngInSymbols" : {
 			"match": function (params) {
@@ -370,13 +382,21 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					return validateLatLngInPolygon(this.latlng, params.regionBoundary);
 				}
 				return false;
-			}, 
-			"geocode": function (params, callback) {
+			},
+			"geocode": function (params) {
+				setTimeout(function() {
+					params.Deferred.resolve({
+						latlng: this.latlng,
+						address: params.originalAddress
+					});
+				}, 1);
+			}
+			/*"geocode": function (params, callback) {
 				callback({
 					latlng: this.latlng,
 					address: params.originalAddress
 				}, "OK");
-			}
+			}*/
 		},
 		"LatLngInDMSSymbols" : {
 			"match": function (params) {
@@ -401,12 +421,20 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
+			"geocode": function (params) {
+				setTimeout(function() {
+					params.Deferred.resolve({
+						latlng: this.latlng,
+						address: params.originalAddress
+					});
+				}, 1);
+			}/*
 			"geocode": function (params, callback) {
 				callback({
 					latlng: this.latlng,
 					address: params.originalAddress
 				}, "OK");
-			}
+			}*/
 		},
 		"UTMInDefaultZone" : {
 			"match": function (params) {
@@ -426,12 +454,20 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params, callback) {
+			"geocode": function (params) {
+				setTimeout(function() {
+					params.Deferred.resolve({
+						latlng: this.latlng,
+						address: params.originalAddress
+					});
+				}, 1);
+			}
+			/*"geocode": function (params, callback) {
 				callback({
 					latlng: this.latlng,
 					address: params.originalAddress
 				}, "OK");
-			}
+			}*/
 		},
 		"UTM" : {
 			"match": function (params) {
@@ -464,19 +500,28 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params, callback) {
+			"geocode": function (params) {
+				setTimeout(function() {
+					params.Deferred.resolve({
+						latlng: this.latlng,
+						address: params.originalAddress
+					});
+				}, 1);
+			}
+			/*"geocode": function (params, callback) {
 				callback({
 					latlng: this.latlng,
 					address: params.originalAddress
 				}, "OK");
-			}
+			}*/
 		},
 		"GeographicTownship" : {
 			"match": function (params) {
 				var twpInfo = getTWPinfo(params.originalAddress);
 				return (twpInfo.success && twpInfo.isTWPOnly);
 			},
-			"geocode": function (params, callback) {
+			//"geocode": function (params, callback) {
+			"geocode": function (params) {
 				var twpInfo = getTWPinfo(params.originalAddress);
 				var settings = {
 					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
@@ -491,7 +536,8 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					areaField: "SHAPE_Area",
 					searchCondition: "OFFICIAL_NAME_UPPER = '" + twpInfo.TWP + "'"
 				};
-				geocodeByQuery(params, settings, callback);
+				//geocodeByQuery(params, settings, callback);
+				geocodeByQuery(params, settings);
 			}
 		},
 		"GeographicTownshipWithLotConcession" : {
@@ -499,7 +545,8 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				var twpInfo = getTWPinfo(params.originalAddress);
 				return (twpInfo.success && (!twpInfo.isTWPOnly));
 			},
-			"geocode": function (params, callback) {
+			//"geocode": function (params, callback) {
+			"geocode": function (params) {
 				var twpInfo = getTWPinfo(params.originalAddress);
 				var settings = { 
 					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
@@ -514,7 +561,8 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					areaField: "SHAPE_Area",
 					searchCondition: "GEOG_TWP" + " = '" + twpInfo.TWP + "' AND CONCESSION = 'CON " + twpInfo.Con + "' AND LOT_NUM = 'LOT " + twpInfo.Lot + "'"
 				};
-				geocodeByQuery(params, settings, callback);
+				//geocodeByQuery(params, settings, callback);
+				geocodeByQuery(params, settings);
 			}
 		}
 	};
@@ -527,9 +575,12 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
  * @param {string} d The address to be geocoded.
  * @return {object} An ojbect sendt to geocoder.
  */
-function geocode(initParams, callback) {
+//function geocode(initParams, callback) {
+function geocode(initParams) {
+	var dfd = new jQuery.Deferred();
 	var defaultParams = {
 		//originalAddress: originalAddress, 
+		Deferred: dfd,
 		geocoderList: (!!initParams.geocoderList) ? _.defaults(initParams.geocoderList, geocoderList) : geocoderList, 
 		regionBoundary: [{x: -95.29920350, y: 48.77505703},{x: -95.29920350, y: 53.07150598}, 	{x: -89.02502409, y: 56.95876930}, 	{x: -87.42238044, y: 56.34499088}, 	{x: -86.36531760, y: 55.93580527}, 	{x: -84.69447635, y: 55.45842206}, 	{x: -81.89837466, y: 55.35612565}, 	{x: -81.96657226, y: 53.17380238}, 	{x: -80.84131182, y: 52.28723355}, 	{x: -79.98884179, y: 51.80985033}, 	{x: -79.34096457, y: 51.74165273}, 	{x: -79.34096457, y: 47.54750019}, 	{x: -78.55669214, y: 46.49043736}, 	{x: -76.61306048, y: 46.14944935}, 	{x: -75.59009645, y: 45.77436253}, 	{x: -74.12384800, y: 45.91075774}, 	{x: -73.98745279, y: 45.02418891}, 	{x: -75.07861443, y: 44.61500329}, 	{x: -75.86288685, y: 44.03532368}, 	{x: -76.88585089, y: 43.69433566}, 	{x: -79.20, y: 43.450196}, 	{x: -78.62488975, y: 42.94416204}, 	{x: -79.54555738, y: 42.43268002}, 	{x: -81.28459623, y: 42.15988961}, 	{x: -82.54625188, y: 41.58020999}, 	{x: -83.26232670, y: 41.95529681}, 	{x: -83.36462310, y: 42.43268002}, 	{x: -82.61444948, y: 42.73956923}, 	{x: -82.17116506, y: 43.59203926}, 	{x: -82.61444948, y: 45.36517692}, 	{x: -84.08069793, y: 45.91075774}, 	{x: -84.93316796, y: 46.69503016}, 	{x: -88.27485047, y: 48.22947621}, 	{x: -89.33191330, y: 47.78619180}, 	{x: -90.32077854, y: 47.68389540}, 	{x: -92.09391619, y: 47.95668581}, 	{x: -94.07164666, y: 48.33177262}, 	{x: -95.29920350, y: 48.77505703}],
 		UTMRange: {
@@ -564,11 +615,14 @@ function geocode(initParams, callback) {
 			return geocoder.match(params);
 		});
 		if(!!geocoder) {
-			geocoder.geocode(params, callback)
+			//geocoder.geocode(params, callback)
+			geocoder.geocode(params)
 		} else {
-			callback({}, "Error");
+			//callback({}, "Error");
+			dfd.reject({});
 		}
 	}
+	return dfd.promise();
 }
 
 var api = {
