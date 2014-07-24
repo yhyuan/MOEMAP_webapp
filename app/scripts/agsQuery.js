@@ -62,6 +62,7 @@ var formatParams_ = function (params) {
 };
 
 var jsonpID_ = 0;
+window['ags_jsonp'] = window['ags_jsonp'] || {};
 var getJSON_ = function (url, params, callbackName, callbackFn) {
   var sid = 'ags_jsonp_' + (jsonpID_++) + '_' + Math.floor(Math.random() * 1000000);
   var script = null;
@@ -149,12 +150,14 @@ var query = function (p) {
     var url = params.mapService + "/" + params.layerID;
 	delete params.mapService;
 	delete params.layerID;
-    /*
-    if (p.geometry && !isString_(p.geometry)) {
-      params.geometry = fromOverlaysToJSON_(p.geometry);
-      params.geometryType = getGeometryType_(p.geometry);
+    
+    if (p.hasOwnProperty("geometry")) {
+      params.geometryType = 'esriGeometryPolygon';
+      params.geometry = '{rings:[[' + _.map(p.geometry, function(pt) {
+      		return "[" + pt.lng.toFixed(6) + "," + pt.lat.toFixed(6) + "]";
+      }).join(',') + ']], spatialReference:{wkid:4326}}';
       params.inSR = 4326;
-    } */
+    } 
     if (p.spatialRelationship) {
       params.spatialRel = p.spatialRelationship;
       delete params.spatialRelationship;

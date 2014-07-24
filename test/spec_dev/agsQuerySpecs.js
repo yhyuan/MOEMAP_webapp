@@ -24,6 +24,21 @@ var agsQuery = require("../../app/scripts/agsQuery");
 					done();
 				});
 	        });
+	        it('should query the Geographic Township layer with a polygon', function (done) {
+	        	var queryParams = {
+					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
+					layerID: 0,
+					returnGeometry: true,
+					geometry: [{lat: 45.011,lng: -77.203},{lat: 45.003,lng: -77.17},{lat: 44.967,lng: -77.194}],
+					outFields: ["SHAPE_Area", "CENX", "CENY", "OFFICIAL_NAME_UPPER"]
+				};
+				var queryPromise = agsQuery.query(queryParams);
+				queryPromise.done(function (fset) {
+					expect(fset.features[0].attributes.OFFICIAL_NAME_UPPER).to.equal("ABINGER");
+					expect(fset.features).to.have.length(1);
+					done();
+				});
+	        });
 	    });
     });
 })();
