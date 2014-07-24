@@ -1,4 +1,5 @@
 'use strict';
+var agsQuery = require("./agsQuery");
 
 var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 /**
@@ -284,19 +285,21 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
  * @param {string} d The address to be geocoded.
  * @return {object} An ojbect sendt to geocoder.
  */
-	geocodeByQuery = function (params, settings, callback) {
+	geocodeByQuery = function (params, settings) {
 		//var layer = new gmaps.ags.Layer(settings.mapService + "/" + settings.layerID);
-		var layer = params.getLayer(settings.mapService, settings.layerID);
+		//var layer = params.getLayer(settings.mapService, settings.layerID);
 		var outFields = settings.fieldsInInfoWindow;
 		outFields.push(settings.latitudeField);
 		outFields.push(settings.longitudeField);
 		outFields.push(settings.areaField);
 		var queryParams = {
+			mapService: settings.mapService,
+			layerID: settings.layerID,			
 			returnGeometry: settings.displayPolygon,
 			where: settings.searchCondition,
 			outFields: outFields
 		};
-		layer.query(queryParams, function (fset) {
+		var processResults = function (fset) {
 			var size = 0;
 			if(fset){
 				var features = fset.features;
@@ -332,14 +335,16 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 							lng: totalLng/totalArea
 						};
 					}
-					callback(result, "OK");
+					result.status = "OK";
+					return result;
 				}else{
-					callback({}, "Error");
+					return {status: "Error"};
 				}
 			}else{
-				callback({}, "Error");
+				return {status: "Error"};
 			}
-		}); 
+		};
+		return agsQuery.query(queryParams).pipe(processResults);
 	},
 	geocoderList = {
 		"LatLngInDecimalDegree" : {
@@ -353,11 +358,17 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params, callback) {
-				callback({
+			"geocode": function (params) {
+				var result = {
 					latlng: this.latlng,
-					address: params.address
-				}, "OK");
+					address: params.address, 
+					status: "OK"
+				};
+				var dfd = new $.Deferred();
+				setTimeout(function() {
+					dfd.resolve(result);
+				}, 1);
+				return dfd.promise();
 			}
 		},
 		"LatLngInSymbols" : {
@@ -372,11 +383,17 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params, callback) {
-				callback({
+			"geocode": function (params) {
+				var result = {
 					latlng: this.latlng,
-					address: params.address
-				}, "OK");
+					address: params.address, 
+					status: "OK"
+				};
+				var dfd = new $.Deferred();
+				setTimeout(function() {
+					dfd.resolve(result);
+				}, 1);
+				return dfd.promise();
 			}
 		},
 		"LatLngInDMSSymbols" : {
@@ -402,11 +419,17 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params, callback) {
-				callback({
+			"geocode": function (params) {
+				var result = {
 					latlng: this.latlng,
-					address: params.address
-				}, "OK");
+					address: params.address, 
+					status: "OK"
+				};
+				var dfd = new $.Deferred();
+				setTimeout(function() {
+					dfd.resolve(result);
+				}, 1);
+				return dfd.promise();
 			}
 		},
 		"UTMInDefaultZone" : {
@@ -427,11 +450,17 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params, callback) {
-				callback({
+			"geocode": function (params) {
+				var result = {
 					latlng: this.latlng,
-					address: params.address
-				}, "OK");
+					address: params.address, 
+					status: "OK"
+				};
+				var dfd = new $.Deferred();
+				setTimeout(function() {
+					dfd.resolve(result);
+				}, 1);
+				return dfd.promise();
 			}
 		},
 		"UTM" : {
@@ -465,11 +494,17 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				}
 				return false;
 			}, 
-			"geocode": function (params, callback) {
-				callback({
+			"geocode": function (params) {
+				var result = {
 					latlng: this.latlng,
-					address: params.address
-				}, "OK");
+					address: params.address, 
+					status: "OK"
+				};
+				var dfd = new $.Deferred();
+				setTimeout(function() {
+					dfd.resolve(result);
+				}, 1);
+				return dfd.promise();
 			}
 		},
 		"GeographicTownship" : {
@@ -477,7 +512,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				var twpInfo = getTWPinfo(params.address);
 				return (twpInfo.success && twpInfo.isTWPOnly);
 			},
-			"geocode": function (params, callback) {
+			"geocode": function (params) {
 				var twpInfo = getTWPinfo(params.address);
 				var settings = {
 					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
@@ -492,7 +527,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					areaField: "SHAPE_Area",
 					searchCondition: "OFFICIAL_NAME_UPPER = '" + twpInfo.TWP + "'"
 				};
-				geocodeByQuery(params, settings, callback);
+				return geocodeByQuery(params, settings);
 			}
 		},
 		"GeographicTownshipWithLotConcession" : {
@@ -500,7 +535,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				var twpInfo = getTWPinfo(params.address);
 				return (twpInfo.success && (!twpInfo.isTWPOnly));
 			},
-			"geocode": function (params, callback) {
+			"geocode": function (params) {
 				var twpInfo = getTWPinfo(params.address);
 				var settings = { 
 					mapService: "http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer",
@@ -515,7 +550,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					areaField: "SHAPE_Area",
 					searchCondition: "GEOG_TWP" + " = '" + twpInfo.TWP + "' AND CONCESSION = 'CON " + twpInfo.Con + "' AND LOT_NUM = 'LOT " + twpInfo.Lot + "'"
 				};
-				geocodeByQuery(params, settings, callback);
+				return geocodeByQuery(params, settings);
 			}
 		}
 	};
@@ -528,7 +563,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
  * @param {string} d The address to be geocoded.
  * @return {object} An ojbect sendt to geocoder.
  */
-function geocode(initParams, callback) {
+function geocode(initParams) {
 	var defaultParams = {
 		//address: address, 
 		geocoderList: (!!initParams.geocoderList) ? _.defaults(initParams.geocoderList, geocoderList) : geocoderList, 
@@ -555,22 +590,26 @@ function geocode(initParams, callback) {
 		}
 	};
 	var params = _.defaults(initParams, defaultParams);
-	/*if (!!initParams.geocoderList) {
-		params.geocoderList = params.geocoderList.concat(initParams.geocoderList);
-	}*/
 	if (!!params.latlng && !!params.latlng.lat && !!params.latlng.lng && !!params.reverseGeocoder) {
-		params.reverseGeocoder(params, callback);
+		return params.reverseGeocoder(params);
 	} else {
 		var geocoder = _.find(_.values(params.geocoderList), function(geocoder){ 
 			return geocoder.match(params);
 		});
 		if(!!geocoder) {
-			geocoder.geocode(params, callback);
+			return geocoder.geocode(params);
 		} else {
 			if (!!params.defaultGeocoder) {
-				params.defaultGeocoder(params, callback);
+				return params.defaultGeocoder(params);
 			} else {
-				callback({}, "Error");
+				var result = {
+					status: "Error"
+				};
+				var dfd = new $.Deferred();
+				setTimeout(function() {
+					dfd.resolve(result);
+				}, 1);
+				return dfd.promise();
 			}
 		}
 	}
