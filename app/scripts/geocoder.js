@@ -291,15 +291,13 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 		//var layer = new gmaps.ags.Layer(settings.mapService + "/" + settings.layerID);
 		//var layer = params.getLayer(settings.mapService, settings.layerID);
 		var outFields = settings.fieldsInInfoWindow;
-		outFields.push(settings.latitudeField);
-		outFields.push(settings.longitudeField);
-		outFields.push(settings.areaField);
+		var otherFields = [settings.latitudeField, settings.longitudeField, settings.areaField];
 		var queryParams = {
 			mapService: settings.mapService,
 			layerID: settings.layerID,			
 			returnGeometry: settings.displayPolygon,
 			where: settings.searchCondition,
-			outFields: outFields
+			outFields: outFields.concat(otherFields)
 		};
 		var processResults = function (fset) {
 			var size = 0;
@@ -346,7 +344,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 				return {status: "Error"};
 			}
 		};
-		return agsQuery.query(queryParams).pipe(processResults);
+		return agsQuery.query(queryParams).then(processResults);
 	},
 	geocoderList = {
 		"LatLngInDecimalDegree" : {

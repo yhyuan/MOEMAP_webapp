@@ -17,9 +17,6 @@ var agsQuery = require("../../app/scripts/agsQuery");
 				};
 				var queryPromise = agsQuery.query(queryParams);
 				queryPromise.done(function (fset) {
-					//console.log(fset);
-					//expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
-					//expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
 					expect(fset.features).to.have.length(1);
 					done();
 				});

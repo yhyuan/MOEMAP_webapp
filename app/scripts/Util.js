@@ -25,7 +25,7 @@ var computerOffset = function(latlng, radius, heading) {
 	return {lat: lat, lng: lng};
 };
 
-var getCircle = function (latlng, radius) {
+var computerCircle = function (latlng, radius) {
 	return _.map(_.range(0, 361, 10), function(heading) {
 		return computerOffset(latlng, radius, heading);
 	});
@@ -41,7 +41,7 @@ var computerDistance = function (fromLatlng, toLatlng) {
 };
 
 var api = {
-	getCircle: getCircle,
+	computerCircle: computerCircle,
 	computerOffset: computerOffset,
 	computerDistance: computerDistance
 }

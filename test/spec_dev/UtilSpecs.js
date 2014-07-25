@@ -60,7 +60,7 @@ var Util = require("../../app/scripts/Util");
 	    describe('Util create a circle on the Earth with a center and radius in meter', function () {
 	        it('should create a circle on the Earth', function () {
 	        	var latlng = {lat: 45.008284, lng: -77.184177};
-	        	var circle = Util.getCircle(latlng, 1000);
+	        	var circle = Util.computerCircle(latlng, 1000);
 	        	expect(circle).to.have.length(37);
 	        	for (var i = 0; i <= 36; i++) {
 					expect(Math.abs(Util.computerDistance(latlng, circle[i]) - 1000)).to.be.below(0.01);
