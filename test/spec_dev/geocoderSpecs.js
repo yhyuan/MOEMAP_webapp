@@ -40,7 +40,7 @@ var geocoder = require('../../app/scripts/geocoder');
             it('should not parse the latitude and longitude outside Ontario', function (done) {
 				var geocodeParams = {address: '43.19040, -77.57275'};
 				var geocodePromise = geocoder.geocode(geocodeParams);
-				geocodePromise.fail(function (result) {
+				geocodePromise.done(function (result) {
 					expect(result.status).to.equal('No_Result');
 					done();
 				});
@@ -71,7 +71,7 @@ var geocoder = require('../../app/scripts/geocoder');
             it('should not parse the latitude and longitude outside Ontario', function (done) {
 				var geocodeParams = {address: '40°42\'37.05", 79°32\'28.92"'};
 				var geocodePromise = geocoder.geocode(geocodeParams);
-				geocodePromise.fail(function (result) {
+				geocodePromise.done(function (result) {
 					expect(result.status).to.equal('No_Result');
 					done();
 				});
@@ -102,7 +102,7 @@ var geocoder = require('../../app/scripts/geocoder');
             it('should not parse the latitude and longitude outside Ontario', function (done) {
 				var geocodeParams = {address: '40d42m37.05s, 79d32m28.92s'};
 				var geocodePromise = geocoder.geocode(geocodeParams);
-				geocodePromise.fail(function (result) {
+				geocodePromise.done(function (result) {
 					expect(result.status).to.equal('No_Result');
 					done();
 				});
@@ -162,7 +162,7 @@ var geocoder = require('../../app/scripts/geocoder');
             it('should not parse the UTM coordinate outside Ontario', function (done) {
 				var geocodeParams = {address: '17, 333050, 4920558'};
 				var geocodePromise = geocoder.geocode(geocodeParams);
-				geocodePromise.fail(function (result) {
+				geocodePromise.done(function (result) {
 					expect(result.status).to.equal('No_Result');
 					done();
 				});
@@ -228,7 +228,7 @@ var geocoder = require('../../app/scripts/geocoder');
 	        it('should not parse the wrong Geographic Township in Ontario', function (done) {
 				var geocodeParams = {address: 'Apple Township'};
 				var geocodePromise = geocoder.geocode(geocodeParams);
-				geocodePromise.fail(function (result) {
+				geocodePromise.done(function (result) {
 					expect(result.status).to.equal('No_Result');
 					done();
 				});
@@ -291,7 +291,7 @@ var geocoder = require('../../app/scripts/geocoder');
 	        it('should not parse the wrong Geographic Township with Lot and Concession in Ontario', function (done) {
 				var geocodeParams = {address: 'Apple Township, Lot 1, Con 2'};
 				var geocodePromise = geocoder.geocode(geocodeParams);
-				geocodePromise.fail(function (result) {
+				geocodePromise.done(function (result) {
 					expect(result.status).to.equal('No_Result');
 					done();
 				});

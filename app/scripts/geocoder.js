@@ -289,6 +289,9 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 		var processResults = function (fset) {
 			var features = fset.features;
 			var size = features.length;
+			if (size === 0) {
+				return {status: 'No_Result'};
+			}
 			var attrs = features[0].attributes;
 			var result = {
 				address: params.address,
@@ -622,8 +625,8 @@ function geocode(initParams) {
 				};
 				var dfd = new $.Deferred();
 				setTimeout(function() {
-					//dfd.resolve(result);
-					dfd.reject(result);
+					dfd.resolve(result);
+					//dfd.reject(result);
 				}, 1);
 				return dfd.promise();
 			}
