@@ -287,49 +287,40 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 			outFields: outFields.concat(otherFields)
 		};
 		var processResults = function (fset) {
-			var size = 0;
-			if(fset){
-				var features = fset.features;
-				size = features.length;
-				if (size > 0) {
-					var attrs = features[0].attributes;
-					var result = {
-						address: params.address,
-						geocodedAddress: settings.getInfoWindow(attrs)
-					};
-					if(queryParams.returnGeometry) {
-						result.geometry = _.map(features, function(feature) {
-							return feature.geometry;
-						});
-					}
-					if (size === 1) {
-						result.latlng = {
-							lat: attrs[settings.latitudeField],
-							lng: attrs[settings.longitudeField]
-						};
-					} else {
-						var totalArea = _.reduce(features, function(tArea, feature) {
-							return feature.attributes[settings.areaField] + tArea;
-						}, 0);
-						var totalLat = _.reduce(features, function(tlat, feature) {
-							return feature.attributes[settings.latitudeField]* feature.attributes[settings.areaField] + tlat;
-						}, 0);
-						var totalLng = _.reduce(features, function(tlng, feature) {
-							return feature.attributes[settings.longitudeField]* feature.attributes[settings.areaField] + tlng;
-						}, 0);
-						result.latlng = {
-							lat: totalLat/totalArea,
-							lng: totalLng/totalArea
-						};
-					}
-					result.status = 'OK';
-					return result;
-				}else{
-					return {status: 'Error'};
-				}
-			}else{
-				return {status: 'Error'};
+			var features = fset.features;
+			var size = features.length;
+			var attrs = features[0].attributes;
+			var result = {
+				address: params.address,
+				geocodedAddress: settings.getInfoWindow(attrs)
+			};
+			if(queryParams.returnGeometry) {
+				result.geometry = _.map(features, function(feature) {
+					return feature.geometry;
+				});
 			}
+			if (size === 1) {
+				result.latlng = {
+					lat: attrs[settings.latitudeField],
+					lng: attrs[settings.longitudeField]
+				};
+			} else {
+				var totalArea = _.reduce(features, function(tArea, feature) {
+					return feature.attributes[settings.areaField] + tArea;
+				}, 0);
+				var totalLat = _.reduce(features, function(tlat, feature) {
+					return feature.attributes[settings.latitudeField]* feature.attributes[settings.areaField] + tlat;
+				}, 0);
+				var totalLng = _.reduce(features, function(tlng, feature) {
+					return feature.attributes[settings.longitudeField]* feature.attributes[settings.areaField] + tlng;
+				}, 0);
+				result.latlng = {
+					lat: totalLat/totalArea,
+					lng: totalLng/totalArea
+				};
+			}
+			result.status = 'OK';
+			return result;
 		};
 		return agsQuery.query(queryParams).then(processResults);
 	},
@@ -627,11 +618,12 @@ function geocode(initParams) {
 				return params.defaultGeocoder(params);
 			} else {
 				var result = {
-					status: 'Error'
+					status: 'No_Result'
 				};
 				var dfd = new $.Deferred();
 				setTimeout(function() {
-					dfd.resolve(result);
+					//dfd.resolve(result);
+					dfd.reject(result);
 				}, 1);
 				return dfd.promise();
 			}

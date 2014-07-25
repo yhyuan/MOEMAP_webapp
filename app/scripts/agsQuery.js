@@ -135,7 +135,16 @@ var query = function (p) {
     params.returnGeometry = p.returnGeometry === false ? false : true;
     params.returnIdsOnly = p.returnIdsOnly === true ? true : false;
     getJSON_(url + '/query', params, '', function(json) {
-        dfd.resolve(json);
+        if(json) {
+            var size = json.features.length;
+            if (size > 0) {
+                dfd.resolve(json);
+            } else {
+                dfd.reject({status: 'No_Result'});
+            }
+        } else {
+            dfd.reject({status: 'Error'});
+        }
     });
     return dfd.promise();
 };
