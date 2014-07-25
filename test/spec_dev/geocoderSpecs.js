@@ -181,6 +181,17 @@ var geocoder = require("../../app/scripts/geocoder");
 					done();
 				});
 	        });
+	        it('should parse the Geographic Township with French keyword in Ontario', function (done) {
+				var geocodeParams = {address: "Canton Abinger"};
+				var geocodePromise = geocoder.geocode(geocodeParams);
+				geocodePromise.done(function (result) {
+					expect(result.status).to.equal("OK");
+					expect(Math.abs(result.latlng.lat - 45.008284)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-77.184177))).to.be.below(0.001);
+					expect(result.geometry).to.have.length(1);
+					done();
+				});
+	        });
 	        it('should parse the Geographic Township in Ontario', function (done) {
 				var geocodeParams = {address: "ABinger TWP"};
 				var geocodePromise = geocoder.geocode(geocodeParams);
@@ -227,6 +238,16 @@ var geocoder = require("../../app/scripts/geocoder");
 	    	this.timeout(150000);
 	        it('should parse the Geographic Township with Lot and Concession in Ontario', function (done) {
 				var geocodeParams = {address: "Abinger TWP, Lot 8, Con 14"};
+				var geocodePromise = geocoder.geocode(geocodeParams);
+				geocodePromise.done(function (result) {
+					expect(result.status).to.equal("OK");
+					expect(Math.abs(result.latlng.lat - 45.067567)).to.be.below(0.001);
+					expect(Math.abs(result.latlng.lng - (-77.16453))).to.be.below(0.001);
+					done();
+				});
+	        });
+	        it('should parse the Geographic Township with Lot and Concession with French keyword in Ontario', function (done) {
+				var geocodeParams = {address: "Canton Abinger, Lot 8, Con 14"};
 				var geocodePromise = geocoder.geocode(geocodeParams);
 				geocodePromise.done(function (result) {
 					expect(result.status).to.equal("OK");
