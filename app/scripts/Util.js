@@ -1,4 +1,5 @@
 /* global _ */
+'use strict';
 
 var EARTH_RADIUS = 6378137; // in meter
 
@@ -44,6 +45,6 @@ var api = {
 	computerCircle: computerCircle,
 	computerOffset: computerOffset,
 	computerDistance: computerDistance
-}
+};
 
 module.exports = api;

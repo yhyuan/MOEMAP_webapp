@@ -64,8 +64,8 @@ module.exports = function (grunt) {
         },
 		browserify: {
 			specs: {
-				src: ["test/spec_dev/**/*Specs.js"],
-				dest: "test/spec/specs.js"/*,
+				src: ['test/spec_dev/**/*Specs.js'],
+				dest: 'test/spec/specs.js'/*,
 				options: {
 					bundleOptions: {
 						debug: epa.debug
@@ -140,7 +140,7 @@ module.exports = function (grunt) {
                 'Gruntfile.js',
                 '<%= config.app %>/scripts/{,*/}*.js',
                 '!<%= config.app %>/scripts/vendor/*',
-                'test/spec/{,*/}*.js'
+                'test/spec_dev/{,*/}*.js'
             ]
         },
 
