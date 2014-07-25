@@ -1,3 +1,5 @@
+/* global _, $ */
+
 var formatTimeString_ = function (time, endTime) {
   var ret = '';
   if (time) {
