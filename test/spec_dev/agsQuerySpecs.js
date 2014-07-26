@@ -36,6 +36,36 @@ var agsQuery = require('../../app/scripts/agsQuery');
 					done();
 				});
 	        });
+	        it('should query the Geographic Township layer with a polygon', function (done) {
+			var geocodeParams = {address: 'Abinger TWP'};
+			var geocodePromise = geocoder.geocode(geocodeParams);
+			geocodePromise.then(function() {
+				if(result.status === 'OK'){
+					var queryParamsList = [{
+						mapService: 'http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer',
+						layerID: 0,
+						returnGeometry: true,
+						geometry: Util.computerCircle(result.latlng, 100),
+						outFields: ['SHAPE_Area', 'CENX', 'CENY', 'OFFICIAL_NAME_UPPER']
+					},{
+						mapService: 'http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/GeographicTownships/MapServer',
+						layerID: 1,
+						returnGeometry: true,
+						geometry: Util.computerCircle(result.latlng, 100),
+						outFields: ['SHAPE_Area', 'CENX', 'CENY', 'GEOG_TWP', 'LOT_NUM', 'CONCESSION']
+					}];
+					var promises = _.map(queryParamsList, function(queryParams) {
+						return agsQuery.query(queryParams);
+					});
+					$.when.apply($, promises).then(function() {
+						expect(arguments[0].features[0].attributes.OFFICIAL_NAME_UPPER).to.equal('ABINGER');
+						expect(arguments[1].features[0].attributes.GEOG_TWP).to.equal('ABINGER');
+					});
+				} else {
+					return result;
+				}
+			});	        	
+	        });
 	    });
     });
 })();
