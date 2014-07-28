@@ -71,5 +71,59 @@ var Util = require('../../app/scripts/Util');
 				});
 	        });
 	    });
+	    describe('agsQuery can query the Sport Fish layer', function () {
+	        this.timeout(150000);
+			var sportfishMapService = 'http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/sportfish2/MapServer';
+	        it('should query the lake name for the sport fish layer', function (done) {
+				var queryParams = {
+					mapService: sportfishMapService,
+					layerID: 0,
+					returnGeometry: true,
+					outFields: ['WATERBODYC', 'LOCNAME_EN', 'LATITUDE', 'LONGITUDE']
+				};
+				queryParams.where = 'UPPER(LOCNAME_EN) LIKE \'%SIMCOE%\'';
+				var queryPromise = agsQuery.query(queryParams);
+				queryPromise.done(function (fset) {
+					expect(fset.features).to.have.length(1);
+					done();
+				});
+	        });
+	        it('should query the species name for the sport fish layer', function (done) {
+				var queryParams = {
+					mapService: sportfishMapService,
+					layerID: 0,
+					returnGeometry: true,
+					outFields: ['WATERBODYC', 'LOCNAME_EN', 'LATITUDE', 'LONGITUDE']
+				};
+				queryParams.where = 'SPECIES_EN LIKE \'%SALMON%\'';
+				var queryPromise = agsQuery.query(queryParams);
+				queryPromise.done(function (fset) {
+					expect(fset.features).to.have.length(49);
+					done();
+				});
+	        });
+	        it('should geocode an address and query the sport fish layers', function (done) {
+				var geocodeParams = {address: '45.42172, -80.60663'};
+				var geocodePromise = geocoder.geocode(geocodeParams);
+				geocodePromise.then(function(result) {
+					if(result.status === 'OK'){
+						var queryParams = {
+							mapService: sportfishMapService,
+							layerID: 0,
+							returnGeometry: true,
+							outFields: ['WATERBODYC', 'LOCNAME_EN', 'LATITUDE', 'LONGITUDE']
+						};
+						queryParams.geometry = Util.computerCircle(result.latlng, 100);
+						var queryPromise = agsQuery.query(queryParams);
+						queryPromise.done(function (fset) {
+							expect(fset.features).to.have.length(1);
+							done();
+						});
+					} else {
+						return result;
+					}
+				});
+	        });
+	    });
     });
 })();
