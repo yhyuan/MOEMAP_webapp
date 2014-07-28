@@ -346,9 +346,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					status: 'OK'
 				};
 				var dfd = new $.Deferred();
-				setTimeout(function() {
-					dfd.resolve(result);
-				}, 1);
+				dfd.resolve(result);
 				return dfd.promise();
 			}
 		},
@@ -371,9 +369,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					status: 'OK'
 				};
 				var dfd = new $.Deferred();
-				setTimeout(function() {
-					dfd.resolve(result);
-				}, 1);
+				dfd.resolve(result);
 				return dfd.promise();
 			}
 		},
@@ -407,9 +403,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					status: 'OK'
 				};
 				var dfd = new $.Deferred();
-				setTimeout(function() {
-					dfd.resolve(result);
-				}, 1);
+				dfd.resolve(result);
 				return dfd.promise();
 			}
 		},
@@ -438,9 +432,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					status: 'OK'
 				};
 				var dfd = new $.Deferred();
-				setTimeout(function() {
-					dfd.resolve(result);
-				}, 1);
+				dfd.resolve(result);
 				return dfd.promise();
 			}
 		},
@@ -482,9 +474,7 @@ var regIsFloat = /^(-?\d+)(\.\d+)?$/,
 					status: 'OK'
 				};
 				var dfd = new $.Deferred();
-				setTimeout(function() {
-					dfd.resolve(result);
-				}, 1);
+				dfd.resolve(result);
 				return dfd.promise();
 			}
 		},
@@ -624,10 +614,7 @@ function geocode(initParams) {
 					status: 'No_Result'
 				};
 				var dfd = new $.Deferred();
-				setTimeout(function() {
-					dfd.resolve(result);
-					//dfd.reject(result);
-				}, 1);
+				dfd.resolve(result);
 				return dfd.promise();
 			}
 		}

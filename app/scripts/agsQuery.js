@@ -136,14 +136,9 @@ var query = function (p) {
     params.returnIdsOnly = p.returnIdsOnly === true ? true : false;
     getJSON_(url + '/query', params, '', function(json) {
         if(json) {
-            //var size = json.features.length;
-            //if (size > 0) {
             dfd.resolve(json);
-            //} else {
-            //   dfd.reject({status: 'No_Result'});
-            //}
         } else {
-            dfd.reject({status: 'Error'});
+            dfd.resolve({status: 'Error'});
         }
     });
     return dfd.promise();
