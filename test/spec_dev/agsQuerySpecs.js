@@ -125,5 +125,27 @@ var Util = require('../../app/scripts/Util');
 				});
 	        });
 	    });
+	    describe('agsQuery can export the Sport Fish map', function () {
+	        this.timeout(150000);
+			var sportfishMapService = 'http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/sportfish2/MapServer';
+	        it('should query the lake name for the sport fish layer', function (done) {
+				var exportParams = {
+					bounds: {
+						southWest: {lat: 43.79307911819258,lng: -80.0613751},
+						northEast: {lat: 43.845099793116404,lng: -78.74301580346679}
+					},
+					width: 1920,
+					height: 105,
+					mapService: 'http://lrcdrrvsdvap002/ArcGIS/rest/services/Interactive_Map_Public/sportfish2/MapServer',
+					visibleLayers: [0, 1, 2]
+				}
+				var exportMapPromise = agsQuery.exportMap(exportParams);
+				exportMapPromise.done(function (result) {
+					expect(result.width).to.equal(1920);
+					expect(result.height).to.equal(105);
+					done();
+				});
+	        });
+	    });
     });
 })();
